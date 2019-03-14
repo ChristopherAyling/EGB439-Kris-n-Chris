@@ -2,8 +2,10 @@ function arenaDraw(xLoc, yLoc, theta)
     arenaSize = [2000, 2000];
 %arenaDraw draws the robot as an isoc. triangle on an arena-like grid
 %   xLoc, yLoc, theta
-    triangleX = [0, 150, 0, 0] - 150 + xLoc;
-    triangleY = [0, 90, 180, 0] - 90 + yLoc;
+    LENGTH = 150;
+    WIDTH = 180;
+    triangleX = [0, 150, 0, 0] - LENGTH + xLoc;
+    triangleY = [0, 90, 180, 0] - (WIDTH/2) + yLoc;
     
     robot = [triangleX; triangleY];
     
