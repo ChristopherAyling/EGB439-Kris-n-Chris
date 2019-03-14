@@ -1,10 +1,10 @@
-function drawBot(x, y, theta)
+function drawBot(x, y, theta, pathX, pathY)
     loc = [x y];
     
-    ARENASIZE = [2000, 2000];
-    LENGTH = 150;
-    WIDTH = 180;
-    BAXOFFSET = 50; % Bot origin offset from back axle
+    ARENASIZE = [2, 2];
+    LENGTH = 0.15;
+    WIDTH = 0.18;
+    BAXOFFSET = 0.05; % Bot origin offset from back axle
     
     r = [
         cos(theta) -sin(theta);
@@ -19,9 +19,15 @@ function drawBot(x, y, theta)
     br = (b*r)+loc;
     cr = (c*r)+loc;
     
+    clf;
     axis square;
+    ax = gca;
+    ax.YDir = 'reverse';
+    axis([0 ARENASIZE(1) 0 ARENASIZE(2)])
+    
     hold on;
 %     axis([-4 4 -4 4]);
+    plot(pathY, pathX, '*-r');
     axis([0 ARENASIZE(1) 0 ARENASIZE(2)])
     plot(0, 0, 'g*') % arena origin
     plot(x, y, 'k*') % bot origin
