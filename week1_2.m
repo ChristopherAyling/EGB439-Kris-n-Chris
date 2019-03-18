@@ -8,6 +8,7 @@
 
 % Read localiser %
 Pb = PiBot('172.19.232.104', '172.19.232.12', 32);
+blueLEDs(Pb, 0);
 figure;
 x = 0;
 y = 0;
@@ -20,27 +21,27 @@ a = false;
 
 goalX = 1;
 goalY = 1;
-
+pathN = 1; 
 while(a == false)
-    Pb.stop();
     pose = Pb.getLocalizerPose();
     
     x = pose.pose.x;
-    y = pose.pose.y + 0.05;
+    y = pose.pose.y;
     
-    pathX(a) = x;
-    pathY(a) = y;
+    pathX(pathN) = x;
+    pathY(pathN) = y;
     theta = pose.pose.theta;
     
-    drawBot(x, y, theta, pathX(1:a), pathY(1:a), goalX, goalY)
+    drawBot(x, y, theta, pathX(1:pathN), pathY(1:pathN), goalX, goalY)
     
     vel = control([x y theta], [goalX goalY]);
     Pb.setVelocity([vel(1), vel(2)]);
     
     if vel(1) == 0 && vel(2) == 0
         a = true;
+        blueLEDs(Pb, 1);
     end
-    pause(0.2);
+    pathN = pathN + 1;
 end
 
 Pb.stop();
