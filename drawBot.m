@@ -30,8 +30,7 @@ function drawBot(x, y, theta, pathX, pathY)
     plot(pathY, pathX, '*-r');
     axis([0 ARENASIZE(1) 0 ARENASIZE(2)])
     plot(0, 0, 'g*') % arena origin
-    plot(x, y, 'k*') % bot origin
-    
+
     plot(ar(1), ar(2), 'b*')
     plot(br(1), br(2), 'bo')
     plot(cr(1), cr(2), 'bo')
