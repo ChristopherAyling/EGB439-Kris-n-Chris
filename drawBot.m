@@ -1,4 +1,4 @@
-function drawBot(x, y, theta, pathX, pathY)
+function drawBot(x, y, theta, pathX, pathY, goalx, goaly)
     loc = [x y];
     
     ARENASIZE = [2, 2];
@@ -32,6 +32,7 @@ function drawBot(x, y, theta, pathX, pathY)
     axis([0 ARENASIZE(1) 0 ARENASIZE(2)])
     plot(0, 0, 'g*') % arena origin
     plot(x, y, 'k*') % bot origin
+    plot(goalx, goaly, 'kp') % goal
     
     plot(ar(1), ar(2), 'b*')
     plot(br(1), br(2), 'bo')
