@@ -27,6 +27,7 @@ function drawBot(x, y, theta, pathX, pathY)
     
     hold on;
 %     axis([-4 4 -4 4]);
+    set(gca, 'color', [0.3 0.6 0.3])
     plot(pathY, pathX, '*-r');
     axis([0 ARENASIZE(1) 0 ARENASIZE(2)])
     plot(0, 0, 'g*') % arena origin
