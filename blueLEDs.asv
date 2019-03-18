@@ -1,0 +1,10 @@
+function blueLEDs(piBot, desiredState)
+    %BLUELEDS set all Blue LEDs
+    % turn all on `blueLE`
+    v = desiredState;
+    if desiredState
+        v = 65535;
+    end
+    piBot.setLEDArray(v)
+end
+
