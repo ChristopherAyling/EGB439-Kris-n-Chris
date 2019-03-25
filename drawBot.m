@@ -31,10 +31,6 @@ function drawBot(x, y, theta, pathX, pathY, goalx, goaly)
     plot(pathY, pathX, '*-r');
     axis([0 ARENASIZE(1) 0 ARENASIZE(2)])
     plot(0, 0, 'g*') % arena origin
-
-
-    plot(x, y, 'k*') % bot origin
-    plot(goalx, goaly, 'kp') % goal
     
     plot(x, y, 'k*') % bot origin
     plot(goalx, goaly, 'kp') % goal

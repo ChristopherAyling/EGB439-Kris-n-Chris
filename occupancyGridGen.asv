@@ -1,4 +1,4 @@
-Pb = PiBot('172.19.232.173', '172.19.232.12', 32);
+Pb = PiBot('172.19.232.191', '172.19.232.12', 32);
 
 image = getLocalizerImage(Pb);
 normImage = double(image) / 255;
@@ -15,18 +15,15 @@ colourisedGrid = cat(3, R, G, B);
 idisp(colourisedGrid);
 hold on;
 plot(50, 50, 'bp')
-pose = Pb.getLocalizerPose();
+pose = Pb;
 drawOnlyBot(pose.pose.x, pose.pose.y, pose.pose.theta)
 hold off;
 
 function drawOnlyBot(x, y, theta)
-    x = x*50;
-    y = 100 - y*50;
-    theta = deg2rad(theta);
     loc = [x y];
     
-    LENGTH = 0.15*40;
-    WIDTH = 0.18*40;
+    LENGTH = 0.15;
+    WIDTH = 0.18;
     BAXOFFSET = 0.05; % Bot origin offset from back axle
     
     r = [
