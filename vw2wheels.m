@@ -1,4 +1,4 @@
-function wheelVel = vw2wheels(vw)
+function wheelVel = vw2wheels(vw, nolim)
     % heelVel = vw2wheels(vw) returns the wheel velocity vector as above, 
     % given the velocity and angular velocity as a 1x2 vector [v, w].
     
@@ -22,17 +22,20 @@ function wheelVel = vw2wheels(vw)
     wheelVel = ([1 1; -1 1] \ [2 * vel; angVel * lateralWheelSpacing])';
     
     wheelVel = wheelVel / (pi * wheelDiameter * (1/60)) * 2;
-    
-    if wheelVel(1) > 100
-        wheelVel(1) = 100;
-    elseif wheelVel(1) < -100
-        wheelVel(1) = -100;
-    end
-    
-    if wheelVel(2) > 100
-        wheelVel(2) = 100;
-    elseif wheelVel(2) < -100
-        wheelVel(2) = -100;
+    if nargin < 2
+        if ~nolim
+            if wheelVel(1) > 100
+                wheelVel(1) = 100;
+            elseif wheelVel(1) < -100
+                wheelVel(1) = -100;
+            end
+
+            if wheelVel(2) > 100
+                wheelVel(2) = 100;
+            elseif wheelVel(2) < -100
+                wheelVel(2) = -100;
+            end
+        end 
     end
     
 end
