@@ -3,6 +3,11 @@ Pb = PiBot('172.19.232.191', '172.19.232.12', 32);
 image = getLocalizerImage(Pb);
 normImage = double(image) / 255;
 biColour = (normImage > 0.89) - (normImage > 0.25);
+%Pb = PiBot('172.19.232.191', '172.19.232.12', 32);
+
+image = getLocalizerImage(Pb);
+normImage = double(image) / 255;
+biColour = (normImage > 0.9) - (normImage > 0.23);
 biColourClean = bwareaopen(biColour, 600);
 occupancyGrid = imresize(biColourClean, 1/5);
 
@@ -46,3 +51,7 @@ function drawOnlyBot(x, y, theta)
     fill([ar(1), br(1), cr(1)], [ar(2), br(2), cr(2)], 'b');
     alpha(.5);
 end
+hold on;
+
+idisp(colourisedGrid);
+

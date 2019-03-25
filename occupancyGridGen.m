@@ -2,8 +2,8 @@ Pb = PiBot('172.19.232.173', '172.19.232.12', 32);
 
 image = getLocalizerImage(Pb);
 normImage = double(image) / 255;
-biColour = (normImage > 0.89) - (normImage > 0.25);
-biColourClean = bwareaopen(biColour, 600);
+biColour = (normImage > 0.9) - (normImage > 0.15);
+biColourClean = bwareaopen(biColour, 700);
 occupancyGrid = imresize(biColourClean, 1/5);
 
 RGB  = zeros(100, 100, 3);  % RGB Image
@@ -12,7 +12,9 @@ G    = RGB(:, :, 2) + (occupancyGrid).^-1 - occupancyGrid;
 B    = RGB(:, :, 3);
 colourisedGrid = cat(3, R, G, B);
 
-idisp(colourisedGrid);
+idisp(colourisedGrid, 'xydata', {[0 2], [0 2]});
+xlabel('u (metres)') 
+ylabel('v (metres)') 
 hold on;
 plot(50, 50, 'bp')
 pose = Pb.getLocalizerPose();
@@ -49,3 +51,4 @@ function drawOnlyBot(x, y, theta)
     fill([ar(1), br(1), cr(1)], [ar(2), br(2), cr(2)], 'b');
     alpha(.5);
 end
+figure;
