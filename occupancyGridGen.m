@@ -14,4 +14,4 @@ colourisedGrid = cat(3, R, G, B);
 
 hold on;
 
-idisp(normImage);
+idisp(colourisedGrid);
