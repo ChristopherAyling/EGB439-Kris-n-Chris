@@ -20,14 +20,14 @@ function vel = control(q, point)
     % Seperate out our q matrix for that readability
     x = q(1);
     y = q(2);
-    theta = q(3);
+    theta = degtorad(q(3));
     % ...and the p matrix
     xGoal = point(1);
     yGoal = point(2);
     
     % Velocity and Angular Gain Respectively
-    gainV = 0.5;
-    gainTheta = 8;
+    gainV = 0.1;
+    gainTheta = 1.1;
     
     % diffX and diffY
     xDiff = xGoal - x;
@@ -36,7 +36,7 @@ function vel = control(q, point)
     % pythagboi
     c = sqrt((xDiff) ^ 2 + (yDiff) ^ 2);
     
-    if c >= 0.01
+    if c >= 0.025
         % Absolute madlad of a velocity formula
         v = gainV * sqrt((xDiff) ^ 2 + (yDiff) ^ 2);
 
