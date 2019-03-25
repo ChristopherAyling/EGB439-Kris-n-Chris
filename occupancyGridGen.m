@@ -22,13 +22,12 @@ drawOnlyBot(pose.pose.x, pose.pose.y, pose.pose.theta)
 hold off;
 
 function drawOnlyBot(x, y, theta)
-    x = x*50;
-    y = 100 - y*50;
+    y = 2 - y;
     theta = deg2rad(theta);
     loc = [x y];
     
-    LENGTH = 0.15*40;
-    WIDTH = 0.18*40;
+    LENGTH = 0.15;
+    WIDTH = 0.18;
     BAXOFFSET = 0.05; % Bot origin offset from back axle
     
     r = [
@@ -51,4 +50,3 @@ function drawOnlyBot(x, y, theta)
     fill([ar(1), br(1), cr(1)], [ar(2), br(2), cr(2)], 'b');
     alpha(.5);
 end
-figure;
