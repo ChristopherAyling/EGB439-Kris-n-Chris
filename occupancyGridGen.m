@@ -1,8 +1,8 @@
-Pb = PiBot('172.19.232.191', '172.19.232.12', 32);
+%Pb = PiBot('172.19.232.191', '172.19.232.12', 32);
 
 image = getLocalizerImage(Pb);
 normImage = double(image) / 255;
-biColour = (normImage > 0.89) - (normImage > 0.25);
+biColour = (normImage > 0.89) - (normImage > 0.15);
 biColourClean = bwareaopen(biColour, 600);
 occupancyGrid = imresize(biColourClean, 1/5);
 
