@@ -7,6 +7,7 @@
 % image = getLocalizerImage(Pb);
 
 % make occupancy grid
+%{
 normImage = double(image) / 255;
 biColour = (normImage > 0.9) - (normImage > 0.25);
 biColourClean = bwareaopen(biColour, 700);
@@ -17,11 +18,13 @@ R    = RGB(:, :, 1) + occupancyGrid;
 G    = RGB(:, :, 2) + (occupancyGrid).^-1 - occupancyGrid;
 B    = RGB(:, :, 3);
 colourisedGrid = cat(3, R, G, B);
+%}
 
 % plan path
 start = [0.3 0.3];
 startTheta = 180;
 goal = [1.6, 1.6];
+startTheta = degtorad(startTheta);
 q = [start, startTheta];
 
 pixelsInM = 50;
@@ -46,8 +49,8 @@ d = 0.1;
 
 % Start simulation
 done = false;
+
 for a = 1:length(plannedPath)
-    
     currentX = plannedPath(a, 1);
     currentY = plannedPath(a, 2);
     
@@ -56,7 +59,8 @@ for a = 1:length(plannedPath)
     vw = purePursuit(currentGoal, q, d, dt, first);
     vel = vw2wheels(vw, 1);
     
-    q = qupdate(q, vel, dt)
+
+    q = qupdate(q, vel, dt);
     
     pathX = [pathX, q(1)];
     pathY = [pathY, q(2)];

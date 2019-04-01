@@ -43,7 +43,7 @@ end
 
 function plotBot(x, y, theta)
     y = y; % might have to be 2-y
-    theta = deg2rad(theta);
+    theta = -radtodeg(theta);
     loc = [x y];
     
     LENGTH = 0.15;
@@ -51,8 +51,8 @@ function plotBot(x, y, theta)
     BAXOFFSET = 0.05; % Bot origin offset from back axle
     
     r = [
-        cos(theta) -sin(theta);
-        sin(theta) cos(theta);
+        cosd(theta) -sind(theta);
+        sind(theta) cosd(theta);
     ];
 
     a = [LENGTH-BAXOFFSET 0];
