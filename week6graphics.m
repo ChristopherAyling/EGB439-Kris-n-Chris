@@ -26,7 +26,7 @@ function week6graphics(occupancyGrid, q, plannedPath, actualPath, start, goal)
 end
 
 function plotOccupancyGrid(occupancyGrid)
-    idisp(occupancyGrid, 'xydata', {[0 2], [0 2]});
+    idisp(occupancyGrid, 'xydata', {[0 2], [0 2]}, 'nogui', 'ynormal');
 end
 
 function plotPlannedPath(plannedPath)

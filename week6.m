@@ -1,14 +1,14 @@
 % Week 6 Practical
 
 % Connect to bot
-% Pb = PiBot('172.19.232.173', '172.19.232.12', 32);
+Pb = PiBot('172.19.232.173', '172.19.232.12', 32);
 
 % Get Image
-% image = getLocalizerImage(Pb);
+image = getLocalizerImage(Pb);
 
 % make occupancy grid
 normImage = double(image) / 255;
-biColour = (normImage > 0.9) - (normImage > 0.25);
+biColour = (normImage > 0.9) - (normImage > 0.16);
 biColourClean = bwareaopen(biColour, 700);
 occupancyGrid = imresize(biColourClean, 1/5);
 
