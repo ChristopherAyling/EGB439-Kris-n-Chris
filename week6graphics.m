@@ -3,6 +3,7 @@ function week6graphics(occupancyGrid, q, plannedPath, actualPath, start, goal)
     axis square;
     ARENASIZE = [2, 2];
     axis([0 ARENASIZE(1) 0 ARENASIZE(2)])
+    set(gcf, 'Menubar','none')
     % occupancy grid
     plotOccupancyGrid(occupancyGrid);
     hold on;

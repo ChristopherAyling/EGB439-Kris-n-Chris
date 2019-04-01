@@ -32,26 +32,37 @@ dx = DXform(occupancyGrid);
 dx.plan(goalInPx);
 p = dx.query(startInPx);
 
+pathX = ones(1, 10000);
+pathY = ones(1, 10000);
+
 plannedPath = p/50;
-actualPath = [0 0; 0.5 1];
+% actualPath = [0 0; 0.5 1];
 
 first = true;
+a = 1;
+
 dt = 0.25;
 d = 0.1;
 
 % Start simulation
 done = false;
 for a = 1:length(plannedPath)
+    
     currentX = plannedPath(a, 1);
     currentY = plannedPath(a, 2);
     
-    % do calc
-    vw = purepursuit(goal, q, d, dt, first);
-	vel = vw2wheels(vw, 1);
+    currentGoal = [currentX currentY]';
     
-	q = qupdate(q, vel, dt);
+    vw = purePursuit(currentGoal, q, d, dt, first);
+    vel = vw2wheels(vw, 1);
+    
+    q = qupdate(q, vel, dt);
+    
+    pathX(a) = q(1);
+    pathY(a) = q(2);
+    actualPath = cat(1, pathX, pathY)';
    
 	% plot graphics
 	week6graphics(colourisedGrid, q, plannedPath, actualPath, start, goal)
-	pause(0.25);
+	pause(0.01);
 end
