@@ -32,8 +32,8 @@ dx = DXform(occupancyGrid);
 dx.plan(goalInPx);
 p = dx.query(startInPx);
 
-pathX = ones(1, 10000);
-pathY = ones(1, 10000);
+pathX = [q(1)];
+pathY = [q(2)];
 
 plannedPath = p/50;
 % actualPath = [0 0; 0.5 1];
@@ -56,10 +56,10 @@ for a = 1:length(plannedPath)
     vw = purePursuit(currentGoal, q, d, dt, first);
     vel = vw2wheels(vw, 1);
     
-    q = qupdate(q, vel, dt);
+    q = qupdate(q, vel, dt)
     
-    pathX(a) = q(1);
-    pathY(a) = q(2);
+    pathX = [pathX, q(1)];
+    pathY = [pathY, q(2)];
     actualPath = cat(1, pathX, pathY)';
    
 	% plot graphics
