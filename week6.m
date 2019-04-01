@@ -19,9 +19,10 @@ actualPath = [0 0; 1 1];
 done = false;
 while ~done
    % do calc
-   q = % do the calc here
+   q = q
    
    % plot graphics
    week6graphics(colourisedGrid, q, plannedPath, actualPath, start, goal)
-   done = true;
+   pause(0.25);
+   done = true; % 
 end
