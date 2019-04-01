@@ -1,11 +1,11 @@
 function week6graphics(occupancyGrid, q, plannedPath, actualPath, start, goal)
     clf;
     axis square;
-    hold on;
     ARENASIZE = [2, 2];
     axis([0 ARENASIZE(1) 0 ARENASIZE(2)])
     % occupancy grid
-    %%%%% TODO
+    plotOccupancyGrid(occupancyGrid);
+    hold on;
     
     % robot
     plotBot(q(1), q(2), q(3))
@@ -22,6 +22,10 @@ function week6graphics(occupancyGrid, q, plannedPath, actualPath, start, goal)
     % goal point
     plot(goal(1), goal(2), 'kp')
     hold off;
+end
+
+function plotOccupancyGrid(occupancyGrid)
+    idisp(occupancyGrid, 'xydata', {[0 2], [0 2]});
 end
 
 function plotPlannedPath(plannedPath)
