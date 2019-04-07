@@ -21,9 +21,9 @@ colourisedGrid = cat(3, R, G, B);
 %}
 
 % plan path
-start = [0.3 0.3];
+start = [1.6, 1.6];
 startTheta = 180;
-goal = [1.6, 1.6];
+goal = [0.3 0.3];
 startTheta = degtorad(startTheta);
 q = [start, startTheta];
 
