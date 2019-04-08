@@ -14,6 +14,8 @@ function vw = purePursuit(goal, q, d, dt, first)
         aei = 0;
     end
     
+    q(3) = degtorad(q(3));
+    
     KVp = 1;
     KVi = 0.1;
     

@@ -5,16 +5,20 @@
 
 % Get Image
 %image = getLocalizerImage(Pb);
-
+%{
 % make occupancy grid
 normImage = double(image) / 255;
 biColour = (normImage > 0.9) - (normImage > 0.25);
 biColourClean = bwareaopen(biColour, 700);
-occupancyGridUnfilled = imresize(biColourClean, 1/5);
+occupancyGrid = imresize(biColourClean, 1/5);
 
-
-occupancyThiccUnfilled = bwmorph(occupancyGrid, 'thicken', 3);
-occupancyThicc = bwmorph(occupancyThiccUnfilled, 'fill');
+% create enlarged version of occupancy grid for navigation
+thickenOperations = 3;
+occupancyClosed = bwmorph(occupancyGrid, 'close');
+occupancyFilled = bwmorph(occupancyClosed, 'fill');
+occupancyNav = bwmorph(occupancyFilled, 'thicken', thickenOperations);
+occupancyNav = bwmorph(occupancyNav, 'close');
+idisp(occupancyNav)
 
 RGB  = zeros(100, 100, 3);  % RGB Image
 R    = RGB(:, :, 1) + occupancyGrid;
@@ -22,16 +26,6 @@ G    = RGB(:, :, 2) + (occupancyGrid).^-1 - occupancyGrid;
 B    = RGB(:, :, 3);
 colourisedGrid = cat(3, R, G, B);
 
-
-close all
-figure;
-idisp(normImage, 'xydata', {[0 2], [0 2]}, 'nogui', 'ynormal');
-figure;
-idisp(occupancyGrid, 'xydata', {[0 2], [0 2]}, 'nogui', 'ynormal');
-figure;
-idisp(occupancyThicc, 'xydata', {[0 2], [0 2]}, 'nogui', 'ynormal')
-
-%{
 % plan path
 start = [1.6, 1.6];
 startTheta = 180;
@@ -43,7 +37,7 @@ pixelsInM = 50;
 goalInPx = goal * pixelsInM;
 startInPx = start * pixelsInM;
 
-dx = DXform(occupancyGrid);
+dx = DXform(occupancyNav);
 dx.plan(goalInPx);
 p = dx.query(startInPx);
 
@@ -83,3 +77,4 @@ for a = 1:length(plannedPath)
 	pause(0.01);
 end
 %}
+
