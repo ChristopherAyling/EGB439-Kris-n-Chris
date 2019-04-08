@@ -16,7 +16,7 @@ function LEDDistDisplay(pb, maxDist, actualDist)
     % just for debugging
     bs = dec2bin(v);
     bssz = size(bs);
-    assert(bssz(2) == nTolightUp)
+%     assert(bssz(2) == nTolightUp)
     
     % set the LED array
     pb.setLEDArray(v)
