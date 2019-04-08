@@ -1,6 +1,6 @@
 Pb = PiBot('172.19.232.191', '172.19.232.12', 32);
 
- image = getLocalizerImage(Pb);
+image = getLocalizerImage(Pb);
 normImage = double(image) / 255;
 biColour = (normImage > 0.9) - (normImage > 0.16);
 biColourClean = bwareaopen(biColour, 700);
