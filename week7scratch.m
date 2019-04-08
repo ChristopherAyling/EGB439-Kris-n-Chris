@@ -1,3 +1,19 @@
+goal = [0.3 0.3]; % set goal here
+
+% convert from real to px units
+pixelsInM = 50;
+goalInPx = goal * pixelsInM;
+startInPx = round(start * pixelsInM);
+
+% compute occupancy grid
+dx = DXform(occupancyNav);
+
+% compute distance transform
+dx.plan(goalInPx);
+
+% compute shortest path 
+p = dx.query(startInPx);
+
 % Week 6 Practical
 
 % Connect to bot
@@ -5,7 +21,7 @@
 
 % Get Image
 %image = getLocalizerImage(Pb);
-
+%{
 % make occupancy grid
 normImage = double(image) / 255;
 biColour = (normImage > 0.9) - (normImage > 0.25);
@@ -14,10 +30,11 @@ occupancyGrid = imresize(biColourClean, 1/5);
 
 % create enlarged version of occupancy grid for navigation
 thickenOperations = 3;
-
 occupancyClosed = bwmorph(occupancyGrid, 'close');
 occupancyFilled = bwmorph(occupancyClosed, 'fill');
 occupancyNav = bwmorph(occupancyFilled, 'thicken', thickenOperations);
+occupancyNav = bwmorph(occupancyNav, 'close');
+idisp(occupancyNav)
 
 RGB  = zeros(100, 100, 3);  % RGB Image
 R    = RGB(:, :, 1) + occupancyGrid;
@@ -36,7 +53,7 @@ pixelsInM = 50;
 goalInPx = goal * pixelsInM;
 startInPx = start * pixelsInM;
 
-dx = DXform(occupancyGrid);
+dx = DXform(occupancyNav);
 dx.plan(goalInPx);
 p = dx.query(startInPx);
 
@@ -75,3 +92,5 @@ for a = 1:length(plannedPath)
 	week6graphics(colourisedGrid, q, plannedPath, actualPath, start, goal)
 	pause(0.01);
 end
+%}
+

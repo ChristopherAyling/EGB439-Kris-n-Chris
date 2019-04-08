@@ -16,10 +16,10 @@ occupancyGrid = imresize(biColourClean, 1/5);
 
 % create enlarged version of occupancy grid for navigation
 thickenOperations = 3;
-
 occupancyClosed = bwmorph(occupancyGrid, 'close');
 occupancyFilled = bwmorph(occupancyClosed, 'fill');
 occupancyNav = bwmorph(occupancyFilled, 'thicken', thickenOperations);
+occupancyNav = bwmorph(occupancyNav, 'close');
 
 RGB  = zeros(100, 100, 3);  % RGB Image
 R    = RGB(:, :, 1) + occupancyGrid;
@@ -40,10 +40,10 @@ goal = [0.3 0.3]; % set goal here
 % convert from real to px units
 pixelsInM = 50;
 goalInPx = goal * pixelsInM;
-startInPx = start * pixelsInM;
+startInPx = round(start * pixelsInM);
 
 % compute occupancy grid
-dx = DXform(occupancyGrid);
+dx = DXform(occupancyNav);
 
 % compute distance transform
 dx.plan(goalInPx);
@@ -76,7 +76,16 @@ for a = 1:length(plannedPath)
     vel = vw2wheels(vw, 1);
     
     % set velocities
-    q = qupdate(q, vel, dt);
+    Pb.setVelocity(vel);
+    
+    pose = Pb.getLocalizerPose();
+    pos = [pose.pose.x, pose.pose.y];
+    posTheta = pose.pose.theta;
+    posTheta = degtorad(startTheta);
+    q = [pos, posTheta];
+    
+    % set velocities
+    %q = qupdate(q, vel, dt);
     
     % store path
     pathX = [pathX, q(1)];
