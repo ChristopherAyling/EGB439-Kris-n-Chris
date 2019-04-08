@@ -10,7 +10,7 @@ image = getLocalizerImage(Pb);
 
 % make occupancy grid
 normImage = double(image) / 255;
-biColour = (normImage > 0.9) - (normImage > 0.16);
+biColour = (normImage > 0.9) - (normImage > 0.25);
 biColourClean = bwareaopen(biColour, 700);
 occupancyGrid = imresize(biColourClean, 1/5);
 
