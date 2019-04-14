@@ -1,5 +1,0 @@
-pb = PiBot('172.19.232.104');
-
-% drive the robot in a circle
-
-% read local

@@ -1,49 +1,22 @@
-% Week 7 Practical
-% 1. 
-
-
 % Connect to bot
-Pb = PiBot('172.19.232.173', '172.19.232.12', 32);
-
-% Get Image
-image = getLocalizerImage(Pb);
-
-% make occupancy grid
-normImage = double(image) / 255;
-biColour = (normImage > 0.9) - (normImage > 0.25);
-biColourClean = bwareaopen(biColour, 700);
-occupancyGrid = imresize(biColourClean, 1/5);
-
-% create enlarged version of occupancy grid for navigation
-thickenOperations = 3;
-occupancyClosed = bwmorph(occupancyGrid, 'close');
-occupancyFilled = bwmorph(occupancyClosed, 'fill');
-occupancyNav = bwmorph(occupancyFilled, 'thicken', thickenOperations);
-occupancyNav = bwmorph(occupancyNav, 'close');
-
-RGB  = zeros(100, 100, 3);  % RGB Image
-R    = RGB(:, :, 1) + occupancyGrid;
-G    = RGB(:, :, 2) + (occupancyGrid).^-1 - occupancyGrid;
-B    = RGB(:, :, 3);
-colourisedGrid = cat(3, R, G, B);
-
+Pb = PiBot('172.19.232.171', '172.19.232.12', 32);
 
 % initialisation
-pose = Pb.getLocalizerPose();
-start = [pose.pose.x, pose.pose.y];
-startTheta = pose.pose.theta;
+q = getPose(Pb);
+start = [q(1), q(2)];
+startTheta = q(3);
 startTheta = degtorad(startTheta);
 q = [start, startTheta];
 
-goal = [0.3 0.3]; % set goal here
+goal = [0.15 0.2]; % set goal here
 
 % convert from real to px units
 pixelsInM = 50;
-goalInPx = goal * pixelsInM;
+goalInPx = round(goal * pixelsInM);
 startInPx = round(start * pixelsInM);
 
 % compute occupancy grid
-dx = DXform(occupancyNav);
+dx = DXform(flipud(occupancyNav));
 
 % compute distance transform
 dx.plan(goalInPx);
@@ -60,32 +33,48 @@ first = true;
 a = 1;
 
 dt = 0.25;
-d = 0.1;
+d = 0.05;
+fd = 0.15;
+
+% calcualte current goal
+currentX = plannedPath(a, 1);
+currentY = plannedPath(a, 2);
+currentGoal = [currentX currentY]';
+
+dx.plot(p);
+pause(1);
 
 % Start simulation
-done = false;
-
-for a = 1:length(plannedPath)
+finalCountdown = 0;
+while true
+    q = getPose(Pb);
+    
+    loc = [q(1), q(2)];
+    dist = pointDist(loc, currentGoal');
+    closeEnough = dist < fd;
+    if closeEnough
+        a = a+1;
+    end
+    if a > length(plannedPath)
+        a = length(plannedPath);
+        d = 0;
+        finalCountdown = finalCountdown + 1;
+    end
+    if pointDist(loc, goal) < 0.1
+       finalCountdown = 10000;
+    end 
     % calcualte current goal
     currentX = plannedPath(a, 1);
     currentY = plannedPath(a, 2);
     currentGoal = [currentX currentY]';
     
     % run controller
-    vw = purePursuit(currentGoal, q, d, dt, first);
-    vel = vw2wheels(vw, 1);
+    vw = purePursuit(currentGoal, [q(1) q(2) deg2rad(q(3))], d, dt, first);
+    first = false;
+    vel = vw2wheels(vw, true);
     
     % set velocities
     Pb.setVelocity(vel);
-    
-    pose = Pb.getLocalizerPose();
-    pos = [pose.pose.x, pose.pose.y];
-    posTheta = pose.pose.theta;
-    posTheta = degtorad(startTheta);
-    q = [pos, posTheta];
-    
-    % set velocities
-    %q = qupdate(q, vel, dt);
     
     % store path
     pathX = [pathX, q(1)];
@@ -93,13 +82,18 @@ for a = 1:length(plannedPath)
     actualPath = cat(1, pathX, pathY)';
    
 	% plot graphics
-	week6graphics(colourisedGrid, q, plannedPath, actualPath, start, goal)
+	week6graphics(colourisedGrid, [q(1) q(2) degtorad(q(3))], plannedPath, actualPath, start, goal, currentGoal')
     
     % creative LEDs
     maxDist = sqrt(8);
-    actualDist = 2;
+    actualDist = pdist([q(1), q(2); goal], 'euclidean');
     LEDDistDisplay(Pb, maxDist, actualDist);
     
     % pause to not overwhelm localiser
 	pause(dt);
+    if finalCountdown > 15
+        finalCountdown
+       break 
+    end
 end
+ex

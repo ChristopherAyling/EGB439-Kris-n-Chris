@@ -1,4 +1,4 @@
-function week6graphics(occupancyGrid, q, plannedPath, actualPath, start, goal)
+function week6graphics(occupancyGrid, q, plannedPath, actualPath, start, goal, pursuit)
     clf;
     axis square;
     ARENASIZE = [2, 2];
@@ -22,11 +22,15 @@ function week6graphics(occupancyGrid, q, plannedPath, actualPath, start, goal)
     
     % goal point
     plot(goal(1), goal(2), 'kp')
+    
+    % pursuit point
+    plotPursuit(pursuit(1), pursuit(2))
+    
     hold off;
 end
 
 function plotOccupancyGrid(occupancyGrid)
-    idisp(occupancyGrid, 'xydata', {[0 2], [0 2]}, 'nogui', 'ynormal');
+    idisp(flipud(occupancyGrid), 'xydata', {[0 2], [0 2]}, 'nogui', 'ynormal');
 end
 
 function plotPlannedPath(plannedPath)
@@ -39,6 +43,10 @@ function plotActualPath(actualPath)
     pathY = actualPath(:,1);
     pathX = actualPath(:,2);
     plot(pathY, pathX, 'r-');
+end
+
+function plotPursuit(x, y)
+    plot(x, y, 'kp')
 end
 
 function plotBot(x, y, theta)

@@ -26,8 +26,8 @@ function vel = control(q, point)
     yGoal = point(2);
     
     % Velocity and Angular Gain Respectively
-    gainV = 0.1;
-    gainTheta = 1.1;
+    gainV = 1.3;
+    gainTheta = 2;
     
     % diffX and diffY
     xDiff = xGoal - x;
@@ -50,7 +50,7 @@ function vel = control(q, point)
 
         % return vel VL VR via vw2wheels
 
-        vel = vw2wheels([v w]);
+        vel = vw2wheels([v w], true);
     else
         vel = [0 0];
     end

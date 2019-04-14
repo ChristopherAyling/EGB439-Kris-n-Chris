@@ -22,7 +22,7 @@ function wheelVel = vw2wheels(vw, nolim)
     wheelVel = ([1 1; -1 1] \ [2 * vel; angVel * lateralWheelSpacing])';
     
     wheelVel = wheelVel / (pi * wheelDiameter * (1/60)) * 2;
-    if nargin < 2
+    if nargin > 1
         if ~nolim
             if wheelVel(1) > 100
                 wheelVel(1) = 100;

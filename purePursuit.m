@@ -14,15 +14,23 @@ function vw = purePursuit(goal, q, d, dt, first)
         aei = 0;
     end
     
-    q(3) = degtorad(q(3));
+    q(3) = q(3);
     
-    KVp = 1;
-    KVi = 0.1;
+    % IRL gains
+    KVp = 1.4;
+    KVi = 0.018;
     
-    KHp = 7;
-    KHi = 0.2;
+    KHp = 1.1;
+    KHi = 0.001;
     
-    % decontsruct args
+    % sim gains
+%     KVp = 0.9;
+%     KVi = 0.018;
+%     
+%     KHp = 2;
+%     KHi = 0.018;1
+    
+    % deconstruct args
     x = q(1);
     y = q(2);
     theta = q(3);
@@ -35,19 +43,22 @@ function vw = purePursuit(goal, q, d, dt, first)
     ydiff = gy-y;
     agoal = atan2(ydiff, xdiff);
     
-    derror = sqrt(xdiff^2 + ydiff^2) - d-0.02;
-    aerror = wrapToPi(agoal - theta);
+    derror = sqrt(xdiff^2 + ydiff^2) - d-0.02
+    aerror = wrapToPi(agoal - theta)
     
     % calculate integrals
     ei = ei + dt*derror;
     aei = aei + dt*aerror;
     
+    % clip props
+%     if derror > 
+    
     % clip integrals
-    if ei > 1
+    if ei > 0.3
         ei = 0.3;
     end
     
-    if aei > 1
+    if aei > 0.1
         aei = 0.1;
     end
     
@@ -88,5 +99,5 @@ function vw = purePursuit(goal, q, d, dt, first)
         w = wmin;
     end
     
-    vw = [v w];
+    vw = [v w]/3
 end
