@@ -1,5 +1,5 @@
 % Connect to bot
-Pb = PiBot('172.19.232.171', '172.19.232.12', 32);
+Pb = PiBot('172.19.232.171', '172.19.232.11', 32);
 
 % initialisation
 q = getPose(Pb);
@@ -8,7 +8,7 @@ startTheta = q(3);
 startTheta = degtorad(startTheta);
 q = [start, startTheta];
 
-goal = [0.15 0.2]; % set goal here
+goal = [1.76 0.22]; % set goal here
 
 % convert from real to px units
 pixelsInM = 50;
@@ -51,19 +51,20 @@ while true
     
     loc = [q(1), q(2)];
     dist = pointDist(loc, currentGoal');
-    closeEnough = dist < fd;
+    closeEnough = dist < fd; % dist from current goal < following dist
     if closeEnough
-        a = a+1;
+        a = a+1; % set next point on path as current goal
     end
-    if a > length(plannedPath)
+    if a >= length(plannedPath) % if on final goal
         a = length(plannedPath);
         d = 0;
-        finalCountdown = finalCountdown + 1;
+        finalCountdown = finalCountdown + 1; % keep moving a little bit
     end
-    if pointDist(loc, goal) < 0.1
+    if pointDist(loc, goal) < 0.1 % if super close, stop
        finalCountdown = 10000;
     end 
-    % calcualte current goal
+    
+    % calculate current goal
     currentX = plannedPath(a, 1);
     currentY = plannedPath(a, 2);
     currentGoal = [currentX currentY]';
@@ -91,9 +92,9 @@ while true
     
     % pause to not overwhelm localiser
 	pause(dt);
-    if finalCountdown > 15
+    if finalCountdown > 15 % if has been close enough for long enough
         finalCountdown
-       break 
+       break % exit simulation
     end
 end
-ex
+ex % stop all robot motion
