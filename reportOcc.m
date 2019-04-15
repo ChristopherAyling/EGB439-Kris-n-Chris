@@ -1,5 +1,5 @@
 % Connect to bot
-Pb = PiBot('172.19.232.126', '172.19.232.12', 32);
+Pb = PiBot('172.19.232.171', '172.19.232.11', 32);
 
 % Get Image
 image = getLocalizerImage(Pb);
@@ -8,7 +8,7 @@ idisp(image);
 
 % make occupancy grid
 normImage = double(image) / 255;
-biColour = (normImage > 0.11) - (normImage > 0.5); %0.25 ->
+biColour = (normImage > 0.05) - (normImage > 0.5);
 biColourClean = bwareaopen(biColour, 1000);
 occupancyGrid = imresize(biColourClean, 1/5);
 
@@ -21,7 +21,7 @@ occupancyFilled = bwmorph(occupancyGrid, 'fill');
 occupancyNav = bwmorph(occupancyFilled, 'thicken', thickenOperations);
 occupancyNav = bwmorph(occupancyNav, 'open', 20);
 
-occupancyNav =  conv2(occupancyNav, ones(5), 'same');
+occupancyNav =  conv2(occupancyNav, ones(6), 'same');
 
 occupancyNav = bwmorph(padarray(occupancyNav, [1, 1], 1, 'both'), 'thicken', 3);
 occupancyNav = bwmorph(occupancyNav, 'close');
@@ -37,8 +37,3 @@ colourisedGrid = cat(3, R, G, B);
 
 figure(4)
 idisp(colourisedGrid)
-
-saveas(1, 'infra', 'png')
-saveas(2, 'occ', 'png')
-saveas(3, 'occNav', 'png')
-saveas(4, 'colGrid', 'png')
