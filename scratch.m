@@ -1,15 +1,16 @@
 clf
 figure(1)
 axis square;
+grid on
 ARENASIZE = [2, 2];
 axis([0 ARENASIZE(1) 0 ARENASIZE(2)])
 hold on
 
 q = [0, 0, 0];
 
-plotBeacon([1.5, 1.5])
-plotBeacon([1, 1.5])
-plotBeacon([0.5, 1.5])
+plotBeacon([1.5, 1.5], 32)
+plotBeacon([1, 1.5], 63)
+plotBeacon([0.5, 1.5], 57)
 
 t = 0;
 while t < 10

@@ -4,14 +4,10 @@ function plotBeacon(loc, id)
     % id (optional) is the beacon's id as either an integer or bitstring
     %
     % >> plotBeacon([1, 1], 57); 
-    % plots a beacon at point (1, 1) as well as the id 57 and it's
-    % bitstring representation 111001
-    %
-    % >> plotBeacon([1, 1], '111001')
-    % does the same as above.
+    % plots a beacon at point (1
 
     % if id is bitstring, convert it to number
-    if ischar(id) || isstring(id)
+    if ischar(id) || istring(id)
        id = bin2dec(id);
     end
 
