@@ -18,7 +18,7 @@ while t < 10
     q = q + 0.1;
     q(3) = q(3)+10;
     plotBotFrame(q)
-    pause(0.01)
+    pause(0.1)
 end
 
 hold off
