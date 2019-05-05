@@ -4,8 +4,9 @@
 Pb = PiBot('172.19.232.171', '172.19.232.11', 32);
 
 beaconLoc = [1, 1]; % given to us
+beaconID = NaN;
 
-q = [0 0 0]
+q = [0 0 0];
 
 while true
     % get q
@@ -22,4 +23,9 @@ while true
     plotBotFrame(q);
     
     % plot beacon
+    if isnan(beaconID)
+       plotBeacon(beaconLoc) 
+    else
+       plotBeacon(beaconLoc, beaconID) 
+    end
 end
