@@ -52,9 +52,10 @@ function [binaryCode] = identifyBeaconId(image)
     yCentroid = regionprops(yBlob,'centroid');
     
     if (length(rCentroid) >= 1)
-        blobsR = length(rCentroid);
-        blobsB = length(bCentroid);
-        blobsY = length(yCentroid);
+        blobsR = length(rCentroid)
+        blobsB = length(bCentroid)
+        blobsY = length(yCentroid)
+        
 
         if blobsR == blobsB && blobsB == blobsY
             beaconN = blobsR;
@@ -65,15 +66,7 @@ function [binaryCode] = identifyBeaconId(image)
         beaconIDs = ones(beaconN, 1);
 
         for i = 1:beaconN
-            %{
-            figure;
-            imshow(normImage);
-            hold on;
-            plot(rCentroid(i).Centroid(1),rCentroid(i).Centroid(2),'ro');
-            plot(bCentroid(i).Centroid(1),bCentroid(i).Centroid(2),'bo');
-            plot(yCentroid(i).Centroid(1),yCentroid(i).Centroid(2),'yo');
-            hold off;
-            %}
+            
             
             % y-values of blobs
             redY = rCentroid(i).Centroid(2);
