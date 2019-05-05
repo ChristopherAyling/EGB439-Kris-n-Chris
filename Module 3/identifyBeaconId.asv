@@ -28,7 +28,7 @@ function [binaryCode] = identifyBeaconId(image)
     yClean = bwareaopen(yBW, 50);
     
     % Disp blobs (for testing)
-
+    %{
     figure;
     idisp(normImage);
     figure;
@@ -37,7 +37,7 @@ function [binaryCode] = identifyBeaconId(image)
     idisp(yClean);
     figure;
     idisp(bClean);
-
+    %}
     
    
     % Identify and plot centroids of blobs for each colour    
@@ -65,7 +65,7 @@ function [binaryCode] = identifyBeaconId(image)
     redY = rCentroid(1).Centroid(2);
     blueY = bCentroid(1).Centroid(2);
     yellowY = yCentroid(1).Centroid(2); 
-
+    
     RED = '01';
     BLUE = '10';
     YELLOW = '11';
@@ -77,8 +77,8 @@ function [binaryCode] = identifyBeaconId(image)
 	elseif blueY < redY && blueY < yellowY
         topBin = BLUE;
     else
-        topBin = YELLOW;
-	end
+	topBin = YELLOW;
+    end
    
 	if strcmp(topBin, RED)
         if blueY < yellowY
