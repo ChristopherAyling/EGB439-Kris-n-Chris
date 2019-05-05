@@ -4,7 +4,7 @@ function [binaryCode] = identifyBeaconId(image)
     % there's a beacon
     
     % Comment this out unless testing
-    close all
+    %close all
     
     % Normalise image so it ranges 0-1
     normImage = double(image) / 255;
@@ -28,6 +28,7 @@ function [binaryCode] = identifyBeaconId(image)
     yClean = bwareaopen(yBW, 50);
     
     % Disp blobs (for testing)
+    %{
     figure;
     idisp(normImage);
     figure;
@@ -36,6 +37,7 @@ function [binaryCode] = identifyBeaconId(image)
     idisp(yClean);
     figure;
     idisp(bClean);
+    %}
     
     % Identify and plot centroids of blobs for each colour    
     % Red Blob and Centroid
@@ -48,6 +50,7 @@ function [binaryCode] = identifyBeaconId(image)
     yBlob = bwlabel(yClean);
     yCentroid = regionprops(yBlob,'centroid');
     
+    %{
     figure;
     imshow(normImage);
     hold on;
@@ -55,6 +58,7 @@ function [binaryCode] = identifyBeaconId(image)
     plot(bCentroid(1).Centroid(1),bCentroid(1).Centroid(2),'bo');
     plot(yCentroid(1).Centroid(1),yCentroid(1).Centroid(2),'yo');
     hold off;
+    %}
     
     % y-values of blobs
     redY = rCentroid(1).Centroid(2);
@@ -69,9 +73,9 @@ function [binaryCode] = identifyBeaconId(image)
     %TOP
 	if redY > blueY && redY > yellowY
         topBin = RED;
-    elseif blueY > redY && blueY > yellowY
+	elseif blueY > redY && blueY > yellowY
         topBin = BLUE;
-    else
+	else
         topBin = YELLOW;
     end
    
@@ -81,15 +85,15 @@ function [binaryCode] = identifyBeaconId(image)
         else
             middleBin = YELLOW;
         end
-    elseif topBin == BLUE
+	elseif topBin == BLUE
         if redY > yellowY
             middleBin = RED;
         else
             middleBin = YELLOW;
         end
-    else
+	else
        middleBin = YELLOW;
-    end
+	end
     
     if strcmp(topBin, RED) && strcmp(middleBin, BLUE)
         bottomBin = YELLOW;
@@ -104,8 +108,7 @@ function [binaryCode] = identifyBeaconId(image)
     else
         bottomBin = BLUE;
     end
-        
-        
+    
     binaryString = strcat(bottomBin, middleBin, topBin);
         
     binaryCode = bin2dec(binaryString);
