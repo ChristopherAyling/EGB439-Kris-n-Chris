@@ -10,10 +10,7 @@ q = [start, startTheta];
 
 goal = [1.76 0.22]; % set goal here
 
-% convert from real to px units
-pixelsInM = 50;
-goalInPx = round(goal * pixelsInM);
-startInPx = round(start * pixelsInM);
+
 
 % compute occupancy grid
 dx = DXform(flipud(occupancyNav));
