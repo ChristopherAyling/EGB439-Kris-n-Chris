@@ -6,7 +6,7 @@ function plotBotFrame(q)
     %   theta: heading angle in the world frame (in degrees)
     x = q(1);
     y = q(2);
-    theta = -q(3); % in degrees
+    theta = -rad2deg(q(3)); % in degrees
 
     loc = [x y];
 

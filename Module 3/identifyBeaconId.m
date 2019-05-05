@@ -50,7 +50,7 @@ function [binaryCode] = identifyBeaconId(image)
     yBlob = bwlabel(yClean);
     yCentroid = regionprops(yBlob,'centroid');
     
-    %{
+    
     figure;
     imshow(normImage);
     hold on;
@@ -58,7 +58,7 @@ function [binaryCode] = identifyBeaconId(image)
     plot(bCentroid(1).Centroid(1),bCentroid(1).Centroid(2),'bo');
     plot(yCentroid(1).Centroid(1),yCentroid(1).Centroid(2),'yo');
     hold off;
-    %}
+    
     
     % y-values of blobs
     redY = rCentroid(1).Centroid(2);
@@ -109,7 +109,7 @@ function [binaryCode] = identifyBeaconId(image)
         bottomBin = BLUE;
     end
     
-    binaryString = strcat(bottomBin, middleBin, topBin);
+    binaryString = strcat(bottomBin, middleBin, topBin)
         
     binaryCode = bin2dec(binaryString);
 end

@@ -1,15 +1,27 @@
-%% Section 1
-
 Pb = PiBot('172.19.232.171', '172.19.232.11', 32);
+Pb.resetEncoder();
 
+clf
+figure(1)
+axis square;
+grid on
+ARENASIZE = [2, 2];
+axis([0 ARENASIZE(1) 0 ARENASIZE(2)])
+hold on
 
-Pb.getEncoder()
+dt = 0.5;
+q = [0, 0, deg2rad(0)];
+plotBotFrame(q);
 
-%% Section 2
-% tsiaidnsalnd $x^2+e^{\pi i}$
-% 
-% $$e^{\pi i} + 1 = 0$$
-% 
-alksndiannd
+steps = 10;
+for i = 1:steps
+    ticks = Pb.getEncoder();
+    Pb.resetEncoder();
+    q = newPose(q, ticks);
+    plotBotFrame(q);
+    Pb.setVelocity([50 50])
+    pause(dt)
+end
 
-%%
+Pb.stop();
+hold off

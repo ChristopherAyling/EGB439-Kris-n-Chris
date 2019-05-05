@@ -16,7 +16,7 @@ function newq = newPose(q, ticks)
     dr = distances(2);
     
     % calculate distances from ticks
-    dc = (dl+dr)/2
+    dc = (dl+dr)/2;
     
     % calculate new pose
     xn = x + dc * cos(theta);
