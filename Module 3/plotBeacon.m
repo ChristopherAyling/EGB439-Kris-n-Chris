@@ -10,17 +10,16 @@ function plotBeacon(loc, id)
     % >> plotBeacon([1, 1], '111001')
     % does the same as above.
 
-    % if id is bitstring, convert it to number
-    if ischar(id) || isstring(id)
-       id = bin2dec(id);
-    end
-
     x = loc(1);
     y = loc(2);
     
     plot(x, y, 'ko', 'MarkerSize', 8, 'LineWidth', 3)
     
     if nargin > 1
+        % if id is bitstring, convert it to number
+        if ischar(id) || isstring(id)
+           id = bin2dec(id);
+        end
         text(x+0.03, y+0.04, num2str(id), 'fontName','Comic Sans MS')
         text(x+0.03, y-0.04, dec2bin(id), 'fontName','Comic Sans MS')
     end
