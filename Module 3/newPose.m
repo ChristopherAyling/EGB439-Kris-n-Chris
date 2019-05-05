@@ -1,7 +1,7 @@
 function newq = newPose(q, ticks)
 %NEWPOSE calculate new pose from encoder ticks
     % robot constants
-    tpr = 380; % ticks per rotation
+    tpr = 360 % ticks per rotation
     R = 0.065; % radius of wheels
     L = 0.18; % wheel base
 
