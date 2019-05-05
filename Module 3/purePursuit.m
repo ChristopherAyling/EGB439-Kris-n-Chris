@@ -46,7 +46,6 @@ function vw = purePursuit(goal, q, d, dt, first)
     
     % calculate integrals
     ei = ei + dt*derror;
-    aei = aei + dt*aerror;
     
     % clip props
     if derror > 0.5
@@ -54,9 +53,9 @@ function vw = purePursuit(goal, q, d, dt, first)
     end
     
     % clip integrals
-    if ei > 0.3
-        ei = 0.3;
-    end
+%     if ei > 0.3
+%         ei = 0.3;
+%     end
     
     % calculate velocity
     v = KVp * derror + KVi*ei;
