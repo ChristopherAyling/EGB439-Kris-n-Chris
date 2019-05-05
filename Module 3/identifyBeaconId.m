@@ -110,7 +110,7 @@ function [binaryCode] = identifyBeaconId(image)
         bottomBin = BLUE;
     end
     
-    binaryString = strcat(topBin, middleBin, bottomBin);
+    binaryString = strcat(topBin, middleBin, bottomBin)
         
     binaryCode = bin2dec(binaryString);
 end
