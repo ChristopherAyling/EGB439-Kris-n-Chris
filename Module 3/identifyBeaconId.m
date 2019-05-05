@@ -29,6 +29,7 @@ function [binaryCode] = identifyBeaconId(image)
     
     % Disp blobs (for testing)
 
+    %{
     figure;
     idisp(normImage);
     figure;
@@ -37,9 +38,8 @@ function [binaryCode] = identifyBeaconId(image)
     idisp(yClean);
     figure;
     idisp(bClean);
+    %}
 
-    
-   
     % Identify and plot centroids of blobs for each colour    
     % Red Blob and Centroid
     rBlob = bwlabel(rClean);
@@ -51,71 +51,90 @@ function [binaryCode] = identifyBeaconId(image)
     yBlob = bwlabel(yClean);
     yCentroid = regionprops(yBlob,'centroid');
     
-    %{
-    figure;
-    imshow(normImage);
-    hold on;
-    plot(rCentroid(1).Centroid(1),rCentroid(1).Centroid(2),'ro');
-    plot(bCentroid(1).Centroid(1),bCentroid(1).Centroid(2),'bo');
-    plot(yCentroid(1).Centroid(1),yCentroid(1).Centroid(2),'yo');
-    hold off;
-    %}
-    
-    % y-values of blobs
-    redY = rCentroid(1).Centroid(2);
-    blueY = bCentroid(1).Centroid(2);
-    yellowY = yCentroid(1).Centroid(2); 
+    if (length(rCentroid) >= 1)
+        blobsR = length(rCentroid);
+        blobsB = length(bCentroid);
+        blobsY = length(yCentroid);
 
-    RED = '01';
-    BLUE = '10';
-    YELLOW = '11';
-    
-    % Gross Code to Find Top, Bottom, and Middle Binary Codes
-    %TOP
-	if redY < blueY && redY < yellowY
-        topBin = RED;
-	elseif blueY < redY && blueY < yellowY
-        topBin = BLUE;
+        if blobsR == blobsB && blobsB == blobsY
+            beaconN = blobsR;
+        else
+            beaconN = 1;
+        end
+
+        beaconIDs = ones(beaconN, 1);
+
+        for i = 1:beaconN
+            %{
+            figure;
+            imshow(normImage);
+            hold on;
+            plot(rCentroid(i).Centroid(1),rCentroid(i).Centroid(2),'ro');
+            plot(bCentroid(i).Centroid(1),bCentroid(i).Centroid(2),'bo');
+            plot(yCentroid(i).Centroid(1),yCentroid(i).Centroid(2),'yo');
+            hold off;
+            %}
+            
+            % y-values of blobs
+            redY = rCentroid(i).Centroid(2);
+            blueY = bCentroid(i).Centroid(2);
+            yellowY = yCentroid(i).Centroid(2);
+
+            RED = '01';
+            BLUE = '10';
+            YELLOW = '11';
+
+            % Gross Code to Find Top, Bottom, and Middle Binary Codes
+            %TOP
+            if redY < blueY && redY < yellowY
+                topBin = RED;
+            elseif blueY < redY && blueY < yellowY
+                topBin = BLUE;
+            else
+                topBin = YELLOW;
+            end
+
+            if strcmp(topBin, RED)
+                if blueY < yellowY
+                    middleBin = BLUE;
+                else
+                    middleBin = YELLOW;
+                end
+            elseif strcmp(topBin, BLUE)
+                if redY < yellowY
+                    middleBin = RED;
+                else
+                    middleBin = YELLOW;
+                end
+            elseif strcmp(topBin, YELLOW)
+                if redY < blueY
+                    middleBin = RED;
+                else
+                    middleBin = BLUE;
+                end
+            end
+
+            if strcmp(topBin, RED) && strcmp(middleBin, BLUE)
+                bottomBin = YELLOW;
+            elseif strcmp(topBin, RED) && strcmp(middleBin, YELLOW)
+                bottomBin = BLUE;
+            elseif strcmp(topBin, BLUE) && strcmp(middleBin, RED)
+                bottomBin = YELLOW;
+            elseif strcmp(topBin, BLUE) && strcmp(middleBin, YELLOW)
+                bottomBin = RED;
+            elseif strcmp(topBin, YELLOW) && strcmp(middleBin, BLUE)
+                bottomBin = RED;
+            else
+                bottomBin = BLUE;
+            end
+
+            binaryString = strcat(bottomBin, middleBin, topBin);
+
+            beaconIDs(i) = bin2dec(binaryString);
+        end
+        binaryCode = beaconIDs;
     else
-        topBin = YELLOW;
-	end
-   
-	if strcmp(topBin, RED)
-        if blueY < yellowY
-            middleBin = BLUE;
-        else
-            middleBin = YELLOW;
-        end
-	elseif strcmp(topBin, BLUE)
-        if redY < yellowY
-            middleBin = RED;
-        else
-            middleBin = YELLOW;
-        end
-	elseif strcmp(topBin, YELLOW)
-        if redY < blueY
-            middleBin = RED;
-        else
-            middleBin = BLUE;
-        end
-	end
-    
-    if strcmp(topBin, RED) && strcmp(middleBin, BLUE)
-        bottomBin = YELLOW;
-    elseif strcmp(topBin, RED) && strcmp(middleBin, YELLOW)
-        bottomBin = BLUE;
-    elseif strcmp(topBin, BLUE) && strcmp(middleBin, RED)
-        bottomBin = YELLOW;
-    elseif strcmp(topBin, BLUE) && strcmp(middleBin, YELLOW)
-        bottomBin = RED;
-    elseif strcmp(topBin, YELLOW) && strcmp(middleBin, BLUE)
-        bottomBin = RED;
-    else
-        bottomBin = BLUE;
-    end
-    
-    binaryString = strcat(bottomBin, middleBin, topBin);
-        
-    binaryCode = bin2dec(binaryString);
+        binaryCode = [-1];
+    end   
 end
 
