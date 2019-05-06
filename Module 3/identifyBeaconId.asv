@@ -47,6 +47,17 @@ function [binaryCode] = identifyBeaconId(image)
     
     % Disp blobs (for testing)
 
+    %{
+    figure;
+    idisp(normImage);
+    figure;
+    idisp(rClean);
+    figure;
+    idisp(yClean);
+    figure;
+    idisp(bClean);
+    %}
+
     % Identify and plot centroids of blobs for each colour    
     % Red Blob and Centroid
     rBlob = bwlabel(rClean);
