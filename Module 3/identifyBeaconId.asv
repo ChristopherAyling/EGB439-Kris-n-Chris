@@ -70,8 +70,7 @@ function [binaryCode, centroidLocations] = identifyBeaconId(image)
         end
 
         beaconIDs = ones(beaconN, 1);
-        centroidLocations = ones(length(bCentroid), 2)*-1;
-        
+
         for i = 1:beaconN
             %{
             figure;
@@ -136,14 +135,6 @@ function [binaryCode, centroidLocations] = identifyBeaconId(image)
             else
                 bottomBin = BLUE;
             end
-            
-            if strcmp(middleBin, BLUE)
-                centroidLocations(i, 1:end) = [bCentroid(i).Centroid(1), bCentroid(i).Centroid(2)];
-            elseif strcmp(middleBin, RED)
-                centroidLocations(i, 1:end) = [rCentroid(i).Centroid(1), rCentroid(i).Centroid(2)];
-            elseif strcmp(middleBin, YELLOW)
-                centroidLocations(i, 1:end) = [yCentroid(i).Centroid(1), yCentroid(i).Centroid(2)];
-            end   
 
             binaryString = strcat(bottomBin, middleBin, topBin);
 
@@ -151,6 +142,19 @@ function [binaryCode, centroidLocations] = identifyBeaconId(image)
         end
         
         binaryCode = beaconIDs;
+        
+        centroidLocations = ones(length(bCentroid), 2)*-1;
+        
+        for i = 1:length(bCentroid)
+            if strcmp(middleBin, BLUE)
+                
+                centroidLocations(1, 1:end) = [bCentroid(i).Centroid(1), bCentroid(i).Centroid(2)];
+            elseif strcmp(middleBin, RED)
+                centroidLocations(1, 1:end) = [bCentroid(i).Centroid(1), bCentroid(i).Centroid(2)];
+            elseif strcmp(middleBin, YELLOW)
+                centroidLocations(1, 1:end) = yCentroid(i).Centroid(1);
+            end   
+        end
     else
         binaryCode = [-1];
         centroidLocations = [-1, -1];
