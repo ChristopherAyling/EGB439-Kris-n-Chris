@@ -15,11 +15,11 @@ function vw = purePursuit(goal, q, d, dt, first)
     q(3) = q(3);
     
     % IRL gains
-    KVp = 0.8;
-    KVi = 0.018;
+    KVp = 0.4;
+    KVi = 0.02;
     
-    KHp = 0.2;
-    KHi = 0.1;
+    KHp = 0.1;
+    KHi = 0.001;
     
     % sim gains
 %     KVp = 0.9;
