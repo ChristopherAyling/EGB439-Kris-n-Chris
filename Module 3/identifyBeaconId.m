@@ -58,7 +58,7 @@ function [binaryCode] = identifyBeaconId(image)
     yBlob = bwlabel(yClean);
     yCentroid = regionprops(yBlob,'centroid');
     
-    if (length(rCentroid) >= 1)
+    if (length(rCentroid) >= 1 && length(bCentroid) >= 1 && length(yCentroid) >= 1)
         blobsR = length(rCentroid);
         blobsB = length(bCentroid);
         blobsY = length(yCentroid);
