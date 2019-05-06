@@ -18,7 +18,7 @@ startTheta = degtorad(startTheta);
 q = [start, startTheta];
 first = true;
 
-goal = [1.9 1.9]; % set goal here
+goal = [1 1]; % set goal here
 
 % convert from real to px units
 pixelsInM = 50;
@@ -33,7 +33,7 @@ p = dx.query(startInPx);
 plannedPath = p/50;
 
 % other config
-dt = 0.25;
+dt = 0.2;
 a = 1;
 d = 0.05;
 fd = 0.1;
@@ -78,7 +78,7 @@ for i = 1:steps
     
     % check if done
     pd = pointDist(loc, goal)
-    minPhotoDist = 0.2;
+    minPhotoDist = 0.3;
     if pd < minPhotoDist
        Pb.stop()
        disp("im close enough for a photo")

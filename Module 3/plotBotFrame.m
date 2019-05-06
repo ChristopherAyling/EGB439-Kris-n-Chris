@@ -25,9 +25,9 @@ function plotBotFrame(q)
     ypointerR = (ypointer*r)+loc;
 
     % plot x pointer
-    plot([x, xpointerR(1)], [y, xpointerR(2)], 'b-', 'LineWidth', 1.5)
+    plot([x, xpointerR(1)], [y, xpointerR(2)], 'r-', 'LineWidth', 1.5)
     %     % plot y pointer
-    plot([x, ypointerR(1)], [y, ypointerR(2)], 'r-', 'LineWidth', 1.5)
+    plot([x, ypointerR(1)], [y, ypointerR(2)], 'b-', 'LineWidth', 1.5)
     % plot origin
     plot(x, y, 'k.', 'MarkerSize', 12)
 end
