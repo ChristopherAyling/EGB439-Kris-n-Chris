@@ -18,7 +18,7 @@ function vw = purePursuit(goal, q, d, dt, first)
     KVp = 0.4;
     KVi = 0.02;
     
-    KHp = 0.1;
+    KHp = 0.08;
     KHi = 0.001;
     
     % sim gains
