@@ -1,0 +1,19 @@
+% face a point
+q = [0.1, 0.1, 0]
+goal = [1, 1]
+
+angleFromBeacon = rad2deg(bearing([q(1), q(2)], goal, q(3)));
+
+Pb.resetEncoder();
+while ~(angleFromBeacon < 5 && angleFromBeacon > -5)
+    % rotate and estimate pose
+    Pb.setVelocity([30, -30]);
+    ticks = Pb.getEncoder();
+    Pb.resetEncoder();
+    q = newPose(q, ticks)
+    idisp(Pb.getImage)
+    % check angle error
+    angleFromBeacon = rad2deg(bearing([q(1), q(2)], goal, q(3)))
+    pause(0.25)
+end
+Pb.stop()

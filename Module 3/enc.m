@@ -1,4 +1,4 @@
-Pb = PiBot('172.19.232.171', '172.19.232.11', 32);
+Pb = PiBot('172.19.232.200', '172.19.232.11', 32);
 Pb.resetEncoder();
 
 % set up plotting
@@ -11,14 +11,14 @@ axis([0 ARENASIZE(1) 0 ARENASIZE(2)])
 hold on
 
 % initialise
-q = [0.1, 0.1, 0];
+q = [0.5, 0.5, 0];
 start = [q(1), q(2)];
 startTheta = q(3);
 startTheta = degtorad(startTheta);
 q = [start, startTheta];
 first = true;
 
-goal = [1 1]; % set goal here
+goal = [0.5 1]; % set goal here
 
 % convert from real to px units
 pixelsInM = 50;
@@ -36,7 +36,7 @@ plannedPath = p/50;
 dt = 0.2;
 a = 1;
 d = 0.05;
-fd = 0.1;
+fd = 0.12;
 steps = 100;
 
 % calcualte current goal
@@ -77,15 +77,35 @@ for i = 1:steps
     Pb.setVelocity(vel*1.5);
     
     % check if done
-    pd = pointDist(loc, goal)
-    minPhotoDist = 0.3;
+    pd = pointDist(loc, goal);
+    minPhotoDist = 0.55;
     if pd < minPhotoDist
-       Pb.stop()
-       disp("im close enough for a photo")
-       img = Pb.getImage();
-       identity = identifyBeaconId(img)
-       plotBeacon(goal, identity);
-       break 
+        Pb.stop()
+        % turn to face beacon
+        angleFromBeacon = rad2deg(bearing([q(1), q(2)], goal, q(3)));
+        Pb.resetEncoder();
+        while ~(angleFromBeacon < 5 && angleFromBeacon > -5)
+            % rotate and estimate pose
+            if angleFromBeacon > 0 % rotate the fastest direction
+                vel = [20 -20];
+            else
+                vel = [-20 20];
+            end
+            Pb.setVelocity(vel);
+            ticks = Pb.getEncoder();
+            Pb.resetEncoder();
+            q = newPose(q, ticks);
+
+            % check angle error
+            angleFromBeacon = rad2deg(bearing([q(1), q(2)], goal, q(3)));
+            pause(0.25)
+        end
+        Pb.stop()
+        disp("im close enough for a photo")
+        img = Pb.getImage();
+        identity = identifyBeaconId(img)
+        plotBeacon(goal, identity);
+        break 
     end
     
     % graphics
@@ -104,4 +124,15 @@ function plotPlannedPath(plannedPath)
     pathY = plannedPath(:,1);
     pathX = plannedPath(:,2);
     plot(pathY, pathX, 'k--');
+end
+
+function r = range_(p1, p2)
+    %RANGE distance between two points
+    % _ is there as range is a built in function
+    x1 = p1(1);
+    y1 = p1(2);
+    x2 = p2(1);
+    y2 = p2(2);
+    
+    r = sqrt((x1-x2)^2 + (y1-y2)^2);
 end

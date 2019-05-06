@@ -1,4 +1,4 @@
-Pb = PiBot('172.19.232.171', '172.19.232.11', 32);
+Pb = PiBot('172.19.232.200', '172.19.232.11', 32);
 Pb.resetEncoder();
 
 % set up plotting
@@ -18,7 +18,7 @@ startTheta = degtorad(startTheta);
 q = [start, startTheta];
 first = true;
 
-goal = [1.8 0.1]; % set goal here
+goal = [0.5 1]; % set goal here
 
 % convert from real to px units
 pixelsInM = 50;
@@ -33,10 +33,10 @@ p = dx.query(startInPx);
 plannedPath = p/50;
 
 % other config
-dt = 0.25;
+dt = 0.2;
 a = 1;
 d = 0.05;
-fd = 0.2;
+fd = 0.12;
 steps = 100;
 
 % calcualte current goal
@@ -64,12 +64,9 @@ for i = 1:steps
         currentX = plannedPath(a, 1);
         currentY = plannedPath(a, 2);
         currentGoal = [currentX currentY]';
+        dist = pointDist(loc, currentGoal');
+        closeEnough = dist < fd; % dist from current goal < following dist
     end
-    
-    % calculate current goal
-    currentX = plannedPath(a, 1);
-    currentY = plannedPath(a, 2);
-    currentGoal = [currentX currentY]';
     
     % run controller
     vw = purePursuit(currentGoal, q, d, dt, first);
@@ -77,13 +74,23 @@ for i = 1:steps
     vel = vw2wheels(vw, true);
     
     % set velocities
-    Pb.setVelocity(vel*1.2);
+    Pb.setVelocity(vel*1.5);
     
     % check if done
     pd = pointDist(loc, goal)
-    minPhotoDist = 0.2;
+    minPhotoDist = 0.55;
     if pd < minPhotoDist
        Pb.stop()
+       % turn to face beacon
+        angleFromBeacon = -1;
+        angleCloseEnough = 10;
+        while angleFromBeacon > closeEnough
+            Pb.setVelocity([30, 0])
+            ticks = Pb.getEncoder();
+            Pb.resetEncoder();
+            q = newPose(q, ticks);
+            b = bearing([q], goal, q(3))
+        end
        disp("im close enough for a photo")
        img = Pb.getImage();
        identity = identifyBeaconId(img)
@@ -107,4 +114,26 @@ function plotPlannedPath(plannedPath)
     pathY = plannedPath(:,1);
     pathX = plannedPath(:,2);
     plot(pathY, pathX, 'k--');
+end
+
+function r = range_(p1, p2)
+    %RANGE distance between two points
+    % _ is there as range is a built in function
+    x1 = p1(1);
+    y1 = p1(2);
+    x2 = p2(1);
+    y2 = p2(2);
+    
+    r = sqrt((x1-x2)^2 + (y1-y2)^2);
+end
+
+function b = bearing(p1, p2, theta)
+    %BEARING
+    % theta is in radians
+    x1 = p1(1);
+    y1 = p1(2);
+    x2 = p2(1);
+    y2 = p2(2);
+    
+    b = atan2(y2-y1, x2-x1) - theta;
 end
