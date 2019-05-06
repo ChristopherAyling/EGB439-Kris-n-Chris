@@ -11,7 +11,7 @@ axis([0 ARENASIZE(1) 0 ARENASIZE(2)])
 hold on
 
 % initialise
-q = [0.5, 0.5, 0];
+q = [0.1, 0.1, 0];
 start = [q(1), q(2)];
 startTheta = q(3);
 startTheta = degtorad(startTheta);
@@ -86,16 +86,17 @@ for i = 1:steps
         Pb.resetEncoder();
         while ~(angleFromBeacon < 5 && angleFromBeacon > -5)
             % rotate and estimate pose
-            if angleFromBeacon > 0 % rotate the fastest direction
-                vel = [20 -20];
+            if angleFromBeacon < 0 % rotate the fastest direction
+                vel = [1 -1];
             else
-                vel = [-20 20];
+                vel = [-1 1];
             end
-            Pb.setVelocity(vel);
+            velMul = 10; %vel speed
+            Pb.setVelocity(vel*velMul);
             ticks = Pb.getEncoder();
             Pb.resetEncoder();
             q = newPose(q, ticks);
-
+            plotBotFrame(q);
             % check angle error
             angleFromBeacon = rad2deg(bearing([q(1), q(2)], goal, q(3)));
             pause(0.25)
