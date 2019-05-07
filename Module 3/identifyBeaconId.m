@@ -138,19 +138,19 @@ function [binaryCode, centroidLocations] = identifyBeaconId(img)
             end
             
             if strcmp(bottomBin, BLUE)
-                centroidLocations(i, 1) = bCentroid(i).Centroid(2);
+                centroidLocations(i, 1:2) = bCentroid(i).Centroid;
             elseif strcmp(bottomBin, RED)
-                centroidLocations(i, 1) = rCentroid(i).Centroid(2);
+                centroidLocations(i, 1:2) = rCentroid(i).Centroid;
             elseif strcmp(bottomBin, YELLOW)
-                centroidLocations(i, 1) = yCentroid(i).Centroid(2);
+                centroidLocations(i, 1:2) = yCentroid(i).Centroid;
             end   
             
             if strcmp(topBin, BLUE)
-                centroidLocations(i, 2) = bCentroid(i).Centroid(2);
+                centroidLocations(i, 3:4) = bCentroid(i).Centroid;
             elseif strcmp(topBin, RED)
-                centroidLocations(i, 2) = rCentroid(i).Centroid(2);
+                centroidLocations(i, 3:4) = rCentroid(i).Centroid;
             elseif strcmp(topBin, YELLOW)
-                centroidLocations(i, 2) = yCentroid(i).Centroid(2);
+                centroidLocations(i, 3:4) = yCentroid(i).Centroid;
             end   
 
             binaryString = strcat(bottomBin, middleBin, topBin);
