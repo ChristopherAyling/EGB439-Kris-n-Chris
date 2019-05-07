@@ -1,6 +1,8 @@
 Pb = PiBot('172.19.232.200', '172.19.232.11', 32);
 Pb.resetEncoder();
 
+ticktracker = [];
+
 % set up plotting
 clf
 figure(1)
@@ -104,17 +106,37 @@ for i = 1:steps
         end
         % begin doing laps
         disp("doing laps")
-        Pb.setVelocity([50 30])
         c = 0;
         maxSteps = 125;
         while c < maxSteps
             c = c + 1;
             ticks = Pb.getEncoder();
+            ticktracker = [ticktracker, ticks];
             Pb.resetEncoder();
-            Pb.setVelocity([50 35]);
+            Pb.setVelocity([50 35]/4);
             q = newPose(q, ticks);
+            img = Pb.getImage();
             plotBotFrame(q);
-            pause(0.2)
+            
+            % take photo
+            [binaryCode, centroidLocations] = identifyBeaconId(img);
+            for idx=1:length(binaryCode)
+               if binaryCode(idx) ~= -1
+                  
+                   range = beaconDistance(centroidLocations(idx,:));
+                   b = beaconBearing(centroidLocations(idx,:));
+                   b = deg2rad(b);
+                   x = q(1);
+                   y = q(2);
+                   t = q(3);
+                   loc = [
+                        x + range * cos(t + b)
+                        y + range * sin(t + b)
+                   ];
+                    plotBeacon(loc, binaryCode(idx))
+               end
+            end
+            pause(0.3)
         end
         break 
     end

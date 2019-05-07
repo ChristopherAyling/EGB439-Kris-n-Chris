@@ -8,11 +8,6 @@ function [bearingFromBot] = beaconBearing(centroid)
     middleScreen = screenWidth / 2;
     hfov = 62.2; % degrees
     
-    if xLoc >= middleScreen
-        distToX = middleScreen - (screenWidth - xLoc);        
-        bearingFromBot = ((distToX * (hfov/2)) / middleScreen) + (hfov/2);
-    else
-        distToX = middleScreen - (middleScreen - xLoc);        
-        bearingFromBot = (distToX * (hfov/2)) / middleScreen;
-    end
+    distToX = middleScreen - xLoc  
+    bearingFromBot = (distToX * (hfov/2)) / middleScreen
 end

@@ -21,7 +21,7 @@ function plotBeacon(loc, id)
            id = bin2dec(id);
         end
         text(x+0.03, y+0.04, num2str(id), 'fontName','Comic Sans MS')
-        text(x+0.03, y-0.04, dec2bin(id), 'fontName','Comic Sans MS')
+%         text(x+0.03, y-0.04, dec2bin(id), 'fontName','Comic Sans MS')
     end
 end
 
