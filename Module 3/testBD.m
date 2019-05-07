@@ -17,29 +17,45 @@ cm90 = cm90.img;
 cm120 = cm120.img;
 cm150 = cm150.img;
 
+%{
+figure;
+idisp(cm30);
+figure;
+idisp(cm45);
+figure;
+idisp(cm60);
+figure;
+idisp(cm90);
+figure;
+idisp(cm120);
+figure;
+idisp(cm150);
+%}
+
+
 % 30
 [var, locs] = identifyBeaconId(cm30);
-bd30 = beaconDistanceOld(locs(2))/1000
+bd30 = beaconDistanceOld(locs)/1000;
 
 % 45
 [var, locs] = identifyBeaconId(cm45);
-bd45 = beaconDistanceOld(locs(2))/1000
+bd45 = beaconDistanceOld(locs)/1000;
 
 % 60
 [var, locs] = identifyBeaconId(cm60);
-bd60 = beaconDistanceOld(locs(2))/1000
+bd60 = beaconDistanceOld(locs)/1000;
 
 % 90
 [var, locs] = identifyBeaconId(cm90);
-bd90 = beaconDistanceOld(locs(2))/1000
+bd90 = beaconDistanceOld(locs)/1000;
 
 % 120
 [var, locs] = identifyBeaconId(cm120);
-bd120 = beaconDistanceOld(locs(2))/1000;
+bd120 = beaconDistanceOld(locs)/1000;
 
 % 150
 [var, locs] = identifyBeaconId(cm150);
-bd150 = beaconDistanceOld(locs(2))/1000;
+bd150 = beaconDistanceOld(locs)/1000;
 
 pass = 0;
 fail = 6;

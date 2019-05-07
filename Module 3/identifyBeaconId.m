@@ -22,10 +22,10 @@ function [binaryCode, centroidLocations] = identifyBeaconId(image)
     yBW = ((r + g) - b) > 0.99;
     
     % Remove small blobs
-    rClean = bwareaopen(rBW, 50);
+    rClean = bwareaopen(rBW, 20);
     %gClean = bwareaopen(gBW, 50);
-    bClean = bwareaopen(bBW, 50);
-    yClean = bwareaopen(yBW, 50);
+    bClean = bwareaopen(bBW, 20);
+    yClean = bwareaopen(yBW, 20);
     
     % Close any gaps (important because sometimes the beacons have white
     % sections between coloured bits and it thinks there's two beacons
@@ -44,6 +44,7 @@ function [binaryCode, centroidLocations] = identifyBeaconId(image)
     figure;
     idisp(yClean);
     %}
+    
     
     % Disp blobs (for testing)
 
@@ -137,12 +138,20 @@ function [binaryCode, centroidLocations] = identifyBeaconId(image)
                 bottomBin = BLUE;
             end
             
-            if strcmp(middleBin, BLUE)
-                centroidLocations(i, 1:end) = [bCentroid(i).Centroid(1), bCentroid(i).Centroid(2)];
-            elseif strcmp(middleBin, RED)
-                centroidLocations(i, 1:end) = [rCentroid(i).Centroid(1), rCentroid(i).Centroid(2)];
-            elseif strcmp(middleBin, YELLOW)
-                centroidLocations(i, 1:end) = [yCentroid(i).Centroid(1), yCentroid(i).Centroid(2)];
+            if strcmp(bottomBin, BLUE)
+                centroidLocations(i, 1) = bCentroid(i).Centroid(2);
+            elseif strcmp(bottomBin, RED)
+                centroidLocations(i, 1) = rCentroid(i).Centroid(2);
+            elseif strcmp(bottomBin, YELLOW)
+                centroidLocations(i, 1) = yCentroid(i).Centroid(2);
+            end   
+            
+            if strcmp(topBin, BLUE)
+                centroidLocations(i, 2) = bCentroid(i).Centroid(2);
+            elseif strcmp(topBin, RED)
+                centroidLocations(i, 2) = rCentroid(i).Centroid(2);
+            elseif strcmp(topBin, YELLOW)
+                centroidLocations(i, 2) = yCentroid(i).Centroid(2);
             end   
 
             binaryString = strcat(bottomBin, middleBin, topBin);
