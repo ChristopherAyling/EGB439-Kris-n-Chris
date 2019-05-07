@@ -7,7 +7,7 @@ function [distanceFromBot] = beaconDistance(centroid)
     realHeight = 100; %mm
     imageHeight = 240; %px
     
-    objectHeight = centroid(1) - centroid(2); %px
+    objectHeight = centroid(2) - centroid(4); %px
     sensorHeight = 2.76; %mm also ???
     
     mm2m = 1000;

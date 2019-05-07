@@ -1,18 +1,18 @@
-function [binaryCode, centroidLocations] = identifyBeaconId(image)
-    % Provide identifyBeaconId an image via I = imread('x.format'); or
-    % via an image taken with the camera and output the binary Code if
+function [binaryCode, centroidLocations] = identifyBeaconId(img)
+    % Provide identifyBeaconId an img via I = imread('x.format'); or
+    % via an img taken with the camera and output the binary Code if
     % there's a beacon
     
     % Comment this out unless testing
     %close all
     
-    % Normalise image so it ranges 0-1
-    normImage = double(image) / 255;
+    % Normalise img so it ranges 0-1
+    normImg = double(img) / 255;
     
     % Seperate RGB layers
-    r = normImage(:, :, 1);
-    g = normImage(:, :, 2);
-    b = normImage(:, :, 3);
+    r = normImg(:, :, 1);
+    g = normImg(:, :, 2);
+    b = normImg(:, :, 3);
     
     % Remove influence of other colours from each layer, and create a 
     % yellow layer via r + g
@@ -36,7 +36,7 @@ function [binaryCode, centroidLocations] = identifyBeaconId(image)
     
     %{
     figure;
-    idisp(normImage);
+    idisp(normImg);
     figure;
     idisp(rClean);
     figure;
@@ -76,15 +76,14 @@ function [binaryCode, centroidLocations] = identifyBeaconId(image)
         for i = 1:beaconN
             %{
             figure;
-            imshow(normImage);
+            imshow(normImg);
             hold on;
             plot(rCentroid(i).Centroid(1),rCentroid(i).Centroid(2),'ro');
             plot(bCentroid(i).Centroid(1),bCentroid(i).Centroid(2),'bo');
             plot(yCentroid(i).Centroid(1),yCentroid(i).Centroid(2),'yo');
             hold off;
             %}
-            
-            
+
             % y-values of blobs
             redY = rCentroid(i).Centroid(2);
             blueY = bCentroid(i).Centroid(2);
@@ -139,19 +138,19 @@ function [binaryCode, centroidLocations] = identifyBeaconId(image)
             end
             
             if strcmp(bottomBin, BLUE)
-                centroidLocations(i, 1) = bCentroid(i).Centroid(2);
+                centroidLocations(i, 1:2) = bCentroid(i).Centroid;
             elseif strcmp(bottomBin, RED)
-                centroidLocations(i, 1) = rCentroid(i).Centroid(2);
+                centroidLocations(i, 1:2) = rCentroid(i).Centroid;
             elseif strcmp(bottomBin, YELLOW)
-                centroidLocations(i, 1) = yCentroid(i).Centroid(2);
+                centroidLocations(i, 1:2) = yCentroid(i).Centroid;
             end   
             
             if strcmp(topBin, BLUE)
-                centroidLocations(i, 2) = bCentroid(i).Centroid(2);
+                centroidLocations(i, 3:4) = bCentroid(i).Centroid;
             elseif strcmp(topBin, RED)
-                centroidLocations(i, 2) = rCentroid(i).Centroid(2);
+                centroidLocations(i, 3:4) = rCentroid(i).Centroid;
             elseif strcmp(topBin, YELLOW)
-                centroidLocations(i, 2) = yCentroid(i).Centroid(2);
+                centroidLocations(i, 3:4) = yCentroid(i).Centroid;
             end   
 
             binaryString = strcat(bottomBin, middleBin, topBin);
