@@ -18,7 +18,13 @@ startTheta = degtorad(startTheta);
 q = [start, startTheta];
 first = true;
 
-goal = [1 1]; % set goal here
+goals = [
+    0.5 0.5;
+    1 0.5;
+    1 1;
+    0.5 1;
+];
+goal = goals(1,:); % set goal here
 
 % convert from real to px units
 pixelsInM = 50;
@@ -48,7 +54,7 @@ currentGoal = [currentX currentY]';
 plotBotFrame(q);
 plotBeacon(goal);
 plotPlannedPath(plannedPath);
-for i = 1:steps
+while true
     % get ticks and estimate new pose
     ticks = Pb.getEncoder();
     Pb.resetEncoder();
@@ -76,40 +82,20 @@ for i = 1:steps
     % set velocities
     Pb.setVelocity(vel*1.5);
     
-    % check if done
-    pd = pointDist(loc, goal);
-    minPhotoDist = 0.6;
-    if pd < minPhotoDist
-        Pb.stop()
-        % turn to face beacon
-        angleFromBeacon = rad2deg(bearing([q(1), q(2)], goal, q(3)));
-        Pb.resetEncoder();
-        while ~(angleFromBeacon < 5 && angleFromBeacon > -5)
-            % rotate and estimate pose
-            if angleFromBeacon < 0 % rotate the fastest direction
-                vel = [1 -1];
-            else
-                vel = [-1 1];
+    % take a photo
+    img = Pb.getImage();
+    [binaryCode, centroidLocations] = identifyBeaconId(img);
+    if binaryCode ~= -1
+        for i = 1:length(centroidLocations)
+            if centroidLocations(i, 1) ~= -1
+                distance = beaconDistance(centroidLocations(i, :));
+                
+                plotBeacon(centroidLocations(i, :), binaryCode(i));
             end
-            velMul = 10; %vel speed
-            Pb.setVelocity(vel*velMul);
-            ticks = Pb.getEncoder();
-            Pb.resetEncoder();
-            q = newPose(q, ticks);
-            plotBotFrame(q);
-            % check angle error
-            angleFromBeacon = rad2deg(bearing([q(1), q(2)], goal, q(3)));
-            pause(0.25)
         end
-        Pb.stop()
-        disp("im close enough for a photo")
-        img = Pb.getImage();
-        figure(2)
-        idisp(img)
-        identity = identifyBeaconId(img)
-        plotBeacon(goal, identity);
-        break 
     end
+    
+    % continue pat
     
     % graphics
     plot(currentX, currentY, 'kp')
@@ -138,4 +124,18 @@ function r = range_(p1, p2)
     y2 = p2(2);
     
     r = sqrt((x1-x2)^2 + (y1-y2)^2);
+end
+
+function plannedPath = computeNewPath(goal, start)
+    % convert from real to px units
+    pixelsInM = 50;
+    goalInPx = round(goal * pixelsInM);
+    startInPx = round(start * pixelsInM);
+
+    % compute path using distance transform
+    nav = zeros(100);
+    dx = DXform(nav);
+    dx.plan(goalInPx);
+    p = dx.query(startInPx);
+    plannedPath = p/50;
 end
