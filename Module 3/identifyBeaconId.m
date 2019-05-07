@@ -1,4 +1,4 @@
-function [binaryCode] = identifyBeaconId(image)
+function [binaryCode, centroidLocations] = identifyBeaconId(image)
     % Provide identifyBeaconId an image via I = imread('x.format'); or
     % via an image taken with the camera and output the binary Code if
     % there's a beacon
@@ -22,10 +22,10 @@ function [binaryCode] = identifyBeaconId(image)
     yBW = ((r + g) - b) > 0.99;
     
     % Remove small blobs
-    rClean = bwareaopen(rBW, 50);
+    rClean = bwareaopen(rBW, 20);
     %gClean = bwareaopen(gBW, 50);
-    bClean = bwareaopen(bBW, 50);
-    yClean = bwareaopen(yBW, 50);
+    bClean = bwareaopen(bBW, 20);
+    yClean = bwareaopen(yBW, 20);
     
     % Close any gaps (important because sometimes the beacons have white
     % sections between coloured bits and it thinks there's two beacons
@@ -44,6 +44,7 @@ function [binaryCode] = identifyBeaconId(image)
     figure;
     idisp(yClean);
     %}
+    
     
     % Disp blobs (for testing)
 
@@ -70,7 +71,8 @@ function [binaryCode] = identifyBeaconId(image)
         end
 
         beaconIDs = ones(beaconN, 1);
-
+        centroidLocations = ones(length(bCentroid), 2)*-1;
+        
         for i = 1:beaconN
             %{
             figure;
@@ -135,14 +137,32 @@ function [binaryCode] = identifyBeaconId(image)
             else
                 bottomBin = BLUE;
             end
+            
+            if strcmp(bottomBin, BLUE)
+                centroidLocations(i, 1) = bCentroid(i).Centroid(2);
+            elseif strcmp(bottomBin, RED)
+                centroidLocations(i, 1) = rCentroid(i).Centroid(2);
+            elseif strcmp(bottomBin, YELLOW)
+                centroidLocations(i, 1) = yCentroid(i).Centroid(2);
+            end   
+            
+            if strcmp(topBin, BLUE)
+                centroidLocations(i, 2) = bCentroid(i).Centroid(2);
+            elseif strcmp(topBin, RED)
+                centroidLocations(i, 2) = rCentroid(i).Centroid(2);
+            elseif strcmp(topBin, YELLOW)
+                centroidLocations(i, 2) = yCentroid(i).Centroid(2);
+            end   
 
             binaryString = strcat(bottomBin, middleBin, topBin);
 
             beaconIDs(i) = bin2dec(binaryString);
         end
+        
         binaryCode = beaconIDs;
     else
         binaryCode = [-1];
+        centroidLocations = [-1, -1];
     end   
 end
 
