@@ -18,14 +18,7 @@ startTheta = degtorad(startTheta);
 q = [start, startTheta];
 first = true;
 
-goals = [
-    0.5 0.5;
-    1 0.5;
-    1 1;
-    0.5 1;
-];
-goal_idx = 1;
-goal = goals(goal_idx, :); % set goal here
+goal = [0.6 1.2]; % set goal here
 
 % convert from real to px units
 pixelsInM = 50;
@@ -53,9 +46,8 @@ currentGoal = [currentX currentY]';
 
 % run
 plotBotFrame(q);
-plotBeacon(goal);
 plotPlannedPath(plannedPath);
-while true
+for i = 1:steps
     % get ticks and estimate new pose
     ticks = Pb.getEncoder();
     Pb.resetEncoder();
@@ -83,31 +75,48 @@ while true
     % set velocities
     Pb.setVelocity(vel*1.5);
     
-    % take a photo
-    img = Pb.getImage();
-    [binaryCode, centroidLocations] = identifyBeaconId(img);
-    if binaryCode ~= -1
-        for i = 1:length(centroidLocations)
-            if centroidLocations(i, 1) ~= -1
-                distance = beaconDistance(centroidLocations(i, :));
-                
-                plotBeacon(centroidLocations(i, :), binaryCode(i));
-            end
-        end
-    end
-    
-    % continue path
+    % check if done
     pd = pointDist(loc, goal);
-    minDist = 0.1;
-    if pd < minDist
-        goal_idx = goal_change + 1;
-        a = 0;
-        
-        currentX = plannedPath(a, 1);
-        currentY = plannedPath(a, 2);
-        currentGoal = [currentX currentY]';
-        
-        
+    minPhotoDist = 0.3;
+    if pd < minPhotoDist
+        disp("close enough to goal point")
+        Pb.stop()
+        % turn to face beacon
+        angleFromBeacon = rad2deg(bearing([q(1), q(2)], goal, q(3)));
+        Pb.resetEncoder();
+        while ~(angleFromBeacon < 10 && angleFromBeacon > -10)
+            % rotate and estimate pose
+            disp("rotating to face desired direction")
+            if angleFromBeacon < 0 % rotate the fastest direction
+                vel = [1 -1];
+            else
+                vel = [-1 1];
+            end
+            velMul = 10; %vel speed
+            Pb.setVelocity(vel*velMul);
+            ticks = Pb.getEncoder();
+            Pb.resetEncoder();
+            q = newPose(q, ticks);
+            plotBotFrame(q);
+            % check angle error
+            angleFromBeacon = rad2deg(bearing([q(1), q(2)], goal, q(3)));
+            pause(0.25)
+        end
+        % begin doing laps
+        disp("doing laps")
+        Pb.setVelocity([50 30])
+        c = 0;
+        maxSteps = 125;
+        while c < maxSteps
+            c = c + 1;
+            ticks = Pb.getEncoder();
+            Pb.resetEncoder();
+            Pb.setVelocity([50 35]);
+            q = newPose(q, ticks);
+            plotBotFrame(q);
+            pause(0.2)
+        end
+        break 
     end
     
     % graphics
@@ -137,18 +146,4 @@ function r = range_(p1, p2)
     y2 = p2(2);
     
     r = sqrt((x1-x2)^2 + (y1-y2)^2);
-end
-
-function plannedPath = computeNewPath(goal, start)
-    % convert from real to px units
-    pixelsInM = 50;
-    goalInPx = round(goal * pixelsInM);
-    startInPx = round(start * pixelsInM);
-
-    % compute path using distance transform
-    nav = zeros(100);
-    dx = DXform(nav);
-    dx.plan(goalInPx);
-    p = dx.query(startInPx);
-    plannedPath = p/50;
 end
