@@ -35,27 +35,27 @@ idisp(cm150);
 
 % 30
 [var, locs] = identifyBeaconId(cm30);
-bd30 = beaconDistanceOld(locs)/1000;
+bd30 = beaconDistance(locs);
 
 % 45
 [var, locs] = identifyBeaconId(cm45);
-bd45 = beaconDistanceOld(locs)/1000;
+bd45 = beaconDistance(locs);
 
 % 60
 [var, locs] = identifyBeaconId(cm60);
-bd60 = beaconDistanceOld(locs)/1000;
+bd60 = beaconDistance(locs);
 
 % 90
 [var, locs] = identifyBeaconId(cm90);
-bd90 = beaconDistanceOld(locs)/1000;
+bd90 = beaconDistance(locs);
 
 % 120
 [var, locs] = identifyBeaconId(cm120);
-bd120 = beaconDistanceOld(locs)/1000;
+bd120 = beaconDistance(locs);
 
 % 150
 [var, locs] = identifyBeaconId(cm150);
-bd150 = beaconDistanceOld(locs)/1000;
+bd150 = beaconDistance(locs);
 
 pass = 0;
 fail = 6;
