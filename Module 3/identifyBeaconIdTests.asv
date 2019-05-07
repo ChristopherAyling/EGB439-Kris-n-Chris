@@ -33,11 +33,8 @@ for i = 1:length(expectedAns)
         else
             disp("Expected: ");disp(expectedAns(i));
             disp("Got: ");disp(currentID);
-            if expectedAns(i) ~= -1
-                sumFailed = sumFailed + 1;
-            else
-                sumPassed = sumPassed + 1;
-            end
+            if e
+            sumFailed = sumFailed + 1;
         end
     end
 end
