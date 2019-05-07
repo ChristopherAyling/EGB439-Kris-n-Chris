@@ -21,19 +21,19 @@ sumFailed = 0;
 sumPassed = 0;
 
 for i = 1:length(expectedAns)
-    disp("====CURRENT======");
-    disp(i)   
+    %disp("====CURRENT======");
+    %disp(i)   
     currentID = identifyBeaconId(tests(i).photo);
     if currentID == 4
         disp("Should be 29, 45, 27");
     else    
         if currentID == expectedAns(i)
-            disp("Pass");
+            %disp("Pass");
             sumPassed = sumPassed + 1;
         else
-            disp("Expected: ");disp(expectedAns(i));
-            disp("Got: ");disp(currentID);
             if expectedAns(i) ~= -1
+                disp("Expected: ");disp(expectedAns(i));
+                disp("Got: ");disp(currentID);
                 sumFailed = sumFailed + 1;
             else
                 sumPassed = sumPassed + 1;
@@ -42,4 +42,4 @@ for i = 1:length(expectedAns)
     end
 end
 
-disp("Sum Passed: ");disp(sumPassed);disp("Sum Failed: ");disp(sumFailed);
+disp("Fail: ");disp(sumFailed);disp("Pass: ");disp(sumPassed);
