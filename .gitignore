@@ -108,3 +108,7 @@ Module 3/identifyBeaconId\.asv
 Module 3/testBD\.asv
 
 Module 3/identifyBeaconIdTests\.asv
+
+Module 3/spinTest\.asv
+
+Module 3/beaconBearing\.asv

@@ -19,7 +19,7 @@ function [binaryCode, centroidLocations] = identifyBeaconId(img)
     rBW = ((r - g) - b) > 0.1;
     gBW = ((g - r) - b) > 0;
     bBW = ((b - g) - r) > 0;
-    yBW = ((r + g) - b) > 0.85;
+    yBW = ((r + g) - b) > 0.93;
     
     % Remove small blobs
     rClean = bwareaopen(rBW, 20);
