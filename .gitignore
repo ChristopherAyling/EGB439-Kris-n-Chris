@@ -103,6 +103,10 @@ venv.bak/
 # mypy
 .mypy_cache/
 
+*.asv
+
+.asv
+
 Module 3/identifyBeaconId\.asv
 
 Module 3/testBD\.asv

@@ -1,4 +1,4 @@
-Pb = PiBot('172.19.232.200', '172.19.232.11', 32);
+Pb = PiBot('172.19.232.102', '172.19.232.11', 32);
 Pb.resetEncoder();
 
 ticktracker = [];
@@ -113,7 +113,7 @@ for i = 1:steps
             ticks = Pb.getEncoder();
             ticktracker = [ticktracker, ticks];
             Pb.resetEncoder();
-            Pb.setVelocity([50 35]/4);
+            Pb.setVelocity([50 35]);
             q = newPose(q, ticks);
             img = Pb.getImage();
             plotBotFrame(q);
@@ -136,7 +136,7 @@ for i = 1:steps
                     plotBeacon(loc, binaryCode(idx))
                end
             end
-            pause(0.3)
+            pause(0.2)
         end
         break 
     end
