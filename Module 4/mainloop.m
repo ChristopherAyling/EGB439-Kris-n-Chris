@@ -55,6 +55,7 @@ Q = diag([.1 3*pi/180]).^2;
 
 while true
     % update mu and Sigma
+    q = q';
     [dtravelled, dtheta] = findChange(q, tickPose(q, Pb));
     [q, S] = predictStep(q, S, dtravelled, dtheta, R);
     [z, map, sensed] = sense(q, Pb, landmarks);
@@ -62,6 +63,7 @@ while true
     q = q';
 %     q = tickPose(q, Pb);
     sqs = [sqs; q];
+    scovs = [scovs; S];
     
     % update purepursuit
     currentX = plannedPath(a, 1);
@@ -104,7 +106,7 @@ while true
             Pb.setVelocity(vel*velMul);
             q = tickPose(q, Pb);
             sqs = [sqs; q];
-            plotArena(sqs, scovs, unloadingAreas, landmarks, plannedPath);
+            plotArena(sqs, scovs, unloadingAreas, landmarks(:, 2:end), plannedPath, []);
             angleFromBeacon = rad2deg(q(3) - goal(3));
             atGoalOrientation = angleFromBeacon < 10 && angleFromBeacon > -10;
             pause(0.25);
@@ -135,7 +137,7 @@ while true
         plannedPath = p/50;
         a = 1;
         
-        plotArena(sqs, scovs, unloadingAreas, landmarks, plannedPath, sensed);
+        plotArena(sqs, scovs, unloadingAreas, landmarks(:, 2:end), plannedPath, sensed);
     end
     
     % calculate new velocities
@@ -147,7 +149,7 @@ while true
     
     % plot graphics
     disp("plotting")
-    plotArena(sqs, scovs, unloadingAreas, landmarks, plannedPath, sensed);
+    plotArena(sqs, scovs, unloadingAreas, landmarks(:, 2:end), plannedPath, sensed);
     pause(dt);
 end
 Pb.stop()
@@ -214,10 +216,16 @@ end
 function [d, dth] = findChange(q1, q2)
     % Returns d (change) and dtheta (change) from previous q and present
     % x y th
+    if ~isreal(q1) || ~isreal(q2)
+       disp("the findChange function was passed an imaginary number") 
+    end
     x = [q1(1), q2(1)];
     y = [q1(2), q2(2)];
     th = [q1(3), q2(3)];
     
-    d = sqrt((x(2) - x(1)) + (y(2) - y(1)));
+    d = pointDist(q1(1:2)', q2(1:2));
     dth = th(2) - th(1);
+    if ~isreal(d) || ~isreal(dth)
+       disp("the findChange function made an imaginary number") 
+    end
 end

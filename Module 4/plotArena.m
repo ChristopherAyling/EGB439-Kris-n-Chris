@@ -176,8 +176,8 @@ end
 
 function plot_cov(x,P,nSigma)
     disp("plotting cov")
-    P = P(1:2,1:2)
-    x = x(1:2)
+    P = P(1:2,1:2);
+    x = x(1:2);
     if(~any(diag(P)==0))
         disp("plotting cov with diag")
         [V,D] = eig(P);
