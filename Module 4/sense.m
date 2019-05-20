@@ -16,7 +16,7 @@ function z = sense(q, Pb)
                 x + r * cos(t + b)
                 y + r * sin(t + b)
            ];
-           z = [z; binaryCodes(idx) r b];
+           z = [z; binaryCodes(idx) r b loc'];
        end
     end
 end
