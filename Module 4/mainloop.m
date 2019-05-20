@@ -10,10 +10,11 @@ start = [1 1 deg2rad(90)];
 q = start;
 
 landmarks = [
-    0.1 0.1;
-    1.9 1.9;
-    0.1 1.9;
-    1.9 0.1;
+    30 2 0.1;
+    45 1 0.1;
+    27 0.1 0.1;
+    57 1.7 1.9;
+    39 0.4 1.9;
 ];
 
 unloadingAreas = [
@@ -54,11 +55,12 @@ Q = diag([.1 3*pi/180]).^2;
 
 while true
     % update mu and Sigma
-    [dtravelled, dtheta] = dothing(q, tickPose(q, Pb));
+    [dtravelled, dtheta] = findChange(q, tickPose(q, Pb));
     [q, S] = predictStep(q, S, dtravelled, dtheta, R);
-    z = sense(q, Pb);
-    [q, S] = updateStep(landmarks, z, q, S, Q);
-    q = tickPose(q, Pb);
+    [z, map, sensed] = sense(q, Pb, landmarks);
+    [q, S] = updateStep(map, z, q, S, Q);
+    q = q';
+%     q = tickPose(q, Pb);
     sqs = [sqs; q];
     
     % update purepursuit
@@ -133,7 +135,7 @@ while true
         plannedPath = p/50;
         a = 1;
         
-        plotArena(sqs, scovs, unloadingAreas, landmarks, plannedPath);
+        plotArena(sqs, scovs, unloadingAreas, landmarks, plannedPath, sensed);
     end
     
     % calculate new velocities
@@ -145,12 +147,12 @@ while true
     
     % plot graphics
     disp("plotting")
-    plotArena(sqs, scovs, unloadingAreas, landmarks, plannedPath);
+    plotArena(sqs, scovs, unloadingAreas, landmarks, plannedPath, sensed);
     pause(dt);
 end
 Pb.stop()
 
-function [xt,S] = predict_step(xt,S,d,dth,R)
+function [xt,S] = predictStep(xt,S,d,dth,R)
     x = xt(1);
     y = xt(2);
     theta = xt(3);
@@ -176,7 +178,7 @@ function [xt,S] = predict_step(xt,S,d,dth,R)
     S = Jx*S*Jx' + Ju*R*Ju'; 
 end
 
-function [x,S] = update_step(map,z,x,S,Q)
+function [x,S] = updateStep(map,z,x,S,Q)
     for i=1:size(z,1)
         xr = x(1);
         yr = x(2);
@@ -209,7 +211,7 @@ function [x,S] = update_step(map,z,x,S,Q)
     end
 end
 
-function [d, dth] = dothing(q1, q2)
+function [d, dth] = findChange(q1, q2)
     % Returns d (change) and dtheta (change) from previous q and present
     % x y th
     x = [q1(1), q2(1)];

@@ -1,4 +1,4 @@
-function plotArena(qs, covs, unloadingAreas, landmarks, plannedPath)
+function plotArena(qs, covs, unloadingAreas, landmarks, plannedPath, sensed)
     % setup plot
     clf;
     axis square;
@@ -17,10 +17,20 @@ function plotArena(qs, covs, unloadingAreas, landmarks, plannedPath)
     plotLandmarks(landmarks);
     plotBot(qs(end, :));
     plotQs(qs(1:end, :));
+    plotSensed(sensed);
        
     plotCovs(covs, qs, 3);
     
     hold off
+end
+
+function plotSensed(sensed)
+    for i=1:size(sensed, 1)
+        beacon = sensed(i, :);
+       loc = beacon(1:2);
+       id = beacon(3);
+       plotBeacon(loc, id);
+    end
 end
 
 function plotPlannedPath(plannedPath)

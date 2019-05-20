@@ -1,7 +1,10 @@
-function z = sense(q, Pb)
+function [z, map, sensed] = sense(q, Pb, landmarks)
 % SENSE return a column vector of [range, bearing, id] values
     z = [];
+    map = [];
+    sensed = [];
     img = Pb.getImage();
+%     load('30cm.mat')
     [binaryCodes, centroidLocations] = identifyBeaconId(img);
     for idx=1:length(binaryCodes)
        if binaryCodes(idx) ~= -1
@@ -15,8 +18,11 @@ function z = sense(q, Pb)
            loc = [
                 x + r * cos(t + b)
                 y + r * sin(t + b)
-           ];
-           z = [z; binaryCodes(idx) r b loc'];
+           ]';
+       
+           z = [z; r b];
+           map = [map; landmarks(landmarks(:, 1) == binaryCodes(idx), 2:end)];
+           sensed = [sensed; loc binaryCodes(idx)];
        end
     end
 end
