@@ -178,5 +178,38 @@ function [xt,S] = predict_step(xt,S,d,dth,R)
 end
 
 function [x,S] = update_step(map,z,x,S,Q)
+    for i=1:size(z,1)
+        xr = x(1);
+        yr = x(2);
+        theta = x(3);
+        lm = map(i,:);
+
+        r = z(i, 1);
+        b = z(i, 2);
+
+        xl = lm(1);
+        yl = lm(2);
+
+        G = [
+            -(xl-xr)/r, -(yl-yr)/r, 0;
+            (yl-yr)/(r*r), -(xl-xr)/(r*r), -1;
+        ];
+
+        h = [
+            sqrt((xl-xr)^2+(yl-yr)^2)
+            wrapToPi(atan2(yl-yr, xl-xr)-theta)
+        ];
+
+        K = S*G'*(G*S*G' + Q)^-1;
+
+        err = z(i, :)-h';
+        err = [err(1); wrapToPi(err(2))];
+        x = x + K*(err);
+        x = [x(1), x(2), wrapToPi(x(3))]';
+        S = (eye(length(K)) - K*G)*S;
+    end
+end
+
+function [d, dth] = dothing(q1, q2)
 
 end
