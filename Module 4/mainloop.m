@@ -54,11 +54,11 @@ Q = diag([.1 3*pi/180]).^2;
 
 while true
     % update mu and Sigma
-%     dtravelled = 
-%     dtheta = 
-%     [q, S] = predictStep(q, S, dtravelled, dtheta, R);
-%     z = []; % to do
-%     [q, S] = updateStep(landmarks, z, q, S, Q);
+    dtravelled = 
+    dtheta = 
+    [q, S] = predictStep(q, S, dtravelled, dtheta, R);
+    z = []; % to do
+    [q, S] = updateStep(landmarks, z, q, S, Q);
     q = tickPose(q, Pb);
     sqs = [sqs; q];
     
@@ -87,10 +87,11 @@ while true
     atGoalLocation = distFromGoal < 0.1;
     if atGoalLocation
         disp("at goal location")
+        Pb.setVelocity([30 30], 0.4)
         Pb.stop();
         % rotate to goal orientation
-        angleFromBeacon = rad2deg(q(3) - goal(3))
-        atGoalOrientation = angleFromBeacon < 10 && angleFromBeacon > -10
+        angleFromBeacon = rad2deg(q(3) - goal(3));
+        atGoalOrientation = angleFromBeacon < 10 && angleFromBeacon > -10;
         while ~atGoalOrientation
             disp("rotating to face desired direction")
             if angleFromBeacon < 0 % rotate the fastest direction
@@ -151,7 +152,29 @@ end
 Pb.stop()
 
 function [xt,S] = predict_step(xt,S,d,dth,R)
+    x = xt(1);
+    y = xt(2);
+    theta = xt(3);
 
+    xt = [
+        x+(d*cos(theta));
+        y+(d*sin(theta));
+        wrapToPi(theta+dth);
+    ];
+
+    Jx = [
+        1 0 -d*sin(theta);
+        0 1 d*cos(theta);
+        0 0 1;
+    ];
+
+    Ju = [
+        cos(theta) 0;
+        sin(theta) 0;
+        0 1;
+    ];
+
+    S = Jx*S*Jx' + Ju*R*Ju'; 
 end
 
 function [x,S] = update_step(map,z,x,S,Q)
