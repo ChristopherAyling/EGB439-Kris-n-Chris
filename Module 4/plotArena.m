@@ -1,4 +1,4 @@
-function plotArena(qs, covs, unloadingAreas, landmarks)
+function plotArena(qs, covs, unloadingAreas, landmarks, plannedPath)
     % setup plot
     clf;
     axis square;
@@ -12,14 +12,21 @@ function plotArena(qs, covs, unloadingAreas, landmarks)
     
     % plot all elements
     plotOrigin(origin);
+    plotPlannedPath(plannedPath);
     plotUnloadingAreas(unloadingAreas);
     plotLandmarks(landmarks);
-%     plotBot(qs(end, :));
+    plotBot(qs(end, :));
     plotQs(qs(1:end, :));
        
     plotCovs(covs, qs, 3);
     
     hold off
+end
+
+function plotPlannedPath(plannedPath)
+    pathY = plannedPath(:,1);
+    pathX = plannedPath(:,2);
+    plot(pathY, pathX, 'k--');
 end
 
 function plotBot(q)

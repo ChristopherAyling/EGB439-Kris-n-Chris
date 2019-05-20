@@ -69,7 +69,7 @@ while true
     loc = [q(1), q(2)];
     dist = pointDist(loc, currentGoal');
     closeEnough = dist < fd; % dist from current goal < following dist
-    as = 0
+    as = 0;
     while closeEnough && as < 20
         as = as + 1;
         disp("updating a")
@@ -86,28 +86,34 @@ while true
     distFromGoal = pointDist(q(1:2), goal(1:2));
     atGoalLocation = distFromGoal < 0.1;
     if atGoalLocation
+        disp("at goal location")
+        Pb.stop();
         % rotate to goal orientation
-        angleFromBeacon = rad2deg(bearing([q(1) q(2)], goal, q(3)));
-        atGoalOrientation = angleFromBeacon < 10 && angleFromBeacon > -10;
+        angleFromBeacon = rad2deg(q(3) - goal(3))
+        atGoalOrientation = angleFromBeacon < 10 && angleFromBeacon > -10
         while ~atGoalOrientation
             disp("rotating to face desired direction")
             if angleFromBeacon < 0 % rotate the fastest direction
-                vel = [1 -1];
-            else
                 vel = [-1 1];
+            else
+                vel = [1 -1];
             end
             velMul = 10; %vel speed
             Pb.setVelocity(vel*velMul);
             q = tickPose(q, Pb);
-            angleFromBeacon = rad2deg(bearing([q(1) q(2)], goal, q(3)));
+            sqs = [sqs; q];
+            plotArena(sqs, scovs, unloadingAreas, landmarks, plannedPath);
+            angleFromBeacon = rad2deg(q(3) - goal(3));
             atGoalOrientation = angleFromBeacon < 10 && angleFromBeacon > -10;
             pause(0.25);
         end
         % pause for 5 seconds
+        disp("pausing for 5 seconds")
         Pb.stop()
         pause(5);
         
         % check if done all goals
+        disp("moving to next goal")
         completeGoals = completeGoals + 1;
         if completeGoals >= totalGoals
             disp("number of complete goals is equal to the total number of goals; exiting.")
@@ -118,7 +124,7 @@ while true
         disp("setting new goal");
         goal = unloadingAreas(2, :);
         goalInPx = round(goal(1:2) * pixelsInM);
-        startInPx = round(start(1:2) * pixelsInM);
+        startInPx = round(q(1:2) * pixelsInM);
 
         nav = zeros(100);
         dx = DXform(nav);
@@ -126,6 +132,8 @@ while true
         p = dx.query(startInPx);
         plannedPath = p/50;
         a = 1;
+        
+        plotArena(sqs, scovs, unloadingAreas, landmarks, plannedPath);
     end
     
     % calculate new velocities
@@ -137,7 +145,7 @@ while true
     
     % plot graphics
     disp("plotting")
-    plotArena(sqs, scovs, unloadingAreas, landmarks);
+    plotArena(sqs, scovs, unloadingAreas, landmarks, plannedPath);
     pause(dt);
 end
 Pb.stop()
