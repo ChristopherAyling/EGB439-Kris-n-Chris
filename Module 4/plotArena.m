@@ -148,7 +148,8 @@ end
 
 function plotCovs(covs, qs, nSigma)
     n = 1;
-    for i=1:size(qs, 1)
+    ncovs = size(covs, 1)/3;
+    for i=1:ncovs
        cvv = covs(n:n+2, :);
        n = n + 3;
        q = qs(i, :)';
