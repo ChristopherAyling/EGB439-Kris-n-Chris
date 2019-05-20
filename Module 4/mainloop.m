@@ -211,5 +211,12 @@ function [x,S] = update_step(map,z,x,S,Q)
 end
 
 function [d, dth] = dothing(q1, q2)
-
+    % Returns d (change) and dtheta (change) from previous q and present
+    % x y th
+    x = [q1(1), q2(1)];
+    y = [q1(2), q2(2)];
+    th = [q1(3), q2(3)];
+    
+    d = sqrt((x(2) - x(1)) + (y(2) - y(1)));
+    dth = th(2) - th(1);
 end
