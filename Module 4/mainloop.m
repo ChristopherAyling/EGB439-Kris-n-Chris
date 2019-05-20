@@ -54,10 +54,9 @@ Q = diag([.1 3*pi/180]).^2;
 
 while true
     % update mu and Sigma
-    dtravelled = 
-    dtheta = 
+    [dtravelled, dtheta] = dothing(q, tickPose(q, Pb));
     [q, S] = predictStep(q, S, dtravelled, dtheta, R);
-    z = []; % to do
+    z = sense(q, Pb);
     [q, S] = updateStep(landmarks, z, q, S, Q);
     q = tickPose(q, Pb);
     sqs = [sqs; q];
