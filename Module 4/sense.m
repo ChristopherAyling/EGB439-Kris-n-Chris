@@ -4,7 +4,7 @@ function [z, map, sensed] = sense(q, Pb, landmarks)
     map = [];
     sensed = [];
     img = Pb.getImage();
-%     load('30cm.mat')
+%     idisp(img)
     [binaryCodes, centroidLocations] = identifyBeaconId(img);
     for idx=1:length(binaryCodes)
        if binaryCodes(idx) ~= -1

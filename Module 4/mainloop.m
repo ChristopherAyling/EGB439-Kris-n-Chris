@@ -6,6 +6,8 @@ totalGoals = 2;
 Pb = PiBot('172.19.232.102', '172.19.232.11', 32);
 Pb.resetEncoder();
 
+sensed = [];
+
 start = [1 1 deg2rad(90)];
 q = start;
 
@@ -51,14 +53,15 @@ currentGoal = [currentX currentY]';
 % setup EKF localisation
 S = diag([1 1 5*pi/180]).^2;
 R = diag([.01 3*pi/180]).^2;
-Q = diag([.1 3*pi/180]).^2;
+Q = diag([3 20*pi/180]).^2;
 
 while true
     % update mu and Sigma
     q = q';
     [dtravelled, dtheta] = findChange(q, tickPose(q, Pb));
     [q, S] = predictStep(q, S, dtravelled, dtheta, R);
-    [z, map, sensed] = sense(q, Pb, landmarks);
+    [z, map, sensedd] = sense(q, Pb, landmarks);
+    sensed = [sensed; sensedd];
     [q, S] = updateStep(map, z, q, S, Q);
     q = q';
 %     q = tickPose(q, Pb);
@@ -206,7 +209,7 @@ function [x,S] = updateStep(map,z,x,S,Q)
         K = S*G'*(G*S*G' + Q)^-1;
 
         err = z(i, :)-h';
-        err = [err(1); wrapToPi(err(2))];
+        err = [err(1); wrapToPi(err(2))]
         x = x + K*(err);
         x = [x(1), x(2), wrapToPi(x(3))]';
         S = (eye(length(K)) - K*G)*S;
