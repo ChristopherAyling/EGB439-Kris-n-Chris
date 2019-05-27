@@ -63,6 +63,8 @@ currentGoal = [currentX currentY]';
 % initialise mode_
 mode_ = "setup";
 
+takenPath = [mu(1:3)];
+
 idKeys = [30, 57, 27, 39, 45];
 idValues = [1, 2, 3, 4, 5];
 landmarkIDs = containers.Map(idKeys, idValues);
@@ -106,7 +108,10 @@ while true
                 [mu, Sigma] = update_slam(currentID, z, mu, Sigma, Q);
             end
         end
-    end    
+    end
+    
+    % record calculated pose
+    takenPath = [takenPath; mu(1:3)'];
     
     % calculate next movement
     switch mode_
@@ -158,7 +163,8 @@ while true
             
         case "d2c"
             % calculate centroid (goal)
-            points = mu2points(mu);
+            disp("calculating centroid")
+            points = mu2points(mu(4:end));
             [centroid, pgon] = calcCentroid(points);
             goal = centroid;
             % check if at centroid
@@ -170,6 +176,7 @@ while true
                 disp("close enough to centroid, exiting")
                 mode_ = "complete";
             else
+                disp("planning new path")
                 % plan new path
                 start = mu(1:2);
                 goalInPx = round(goal * pixelsInM);
@@ -188,6 +195,20 @@ while true
     end
     
     % graphics
+    disp("making pretty pictures")
+    % plot robot frame
+    plotBotFrame(mu(1:3))
+    % plot robot covariance
+    plot_cov(mu(1:3), Sigma(1:3, 1:3), 3)
+    % plot landmark mus & covs
+    plot_landmarks(mu(4:end), Sigma(4:end, 4:end))
+    
+    % plot planned path
+    if strcmp(mode_, "setup") || strcmp(mode_, "d2c")
+        plotPlannedPath(plannedPath)
+    end
+    % plot path taken
+    plotTakenPath(takenPath)
     
     % LEDS
     displaymode_(mode_, Pb);
