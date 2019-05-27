@@ -6,7 +6,9 @@
 %     note: although the prediction step does not change the estimation 
 %     of the landmarks in the map, this function accepts the full state space
 %     and only alter the pose of the robot in it.
-function [mu,Sigma] =predict_slam(mu,Sigma,d,dth,R)
+
+% Update Space Jam
+function [mu,Sigma] =predict_slam(mu, Sigma, d, dth, R)
      % Seperating out prev. xt's theta (x, y are only used once so no need)
     x = mu(1);
     y = mu(2);

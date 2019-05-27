@@ -7,7 +7,9 @@
 %   mu,Sigma: the current estimate of the robot pose and the map (the map will be empty so the size of mu is 3x1 and Sigma 3x3).
 % The function returns mu and Sigma after initialising (if n is the number of landmarks, the function returns mu of size (3+2n)x1 and Sigma of size (3+2n)x(3+2xn))
 % all t he landmarks
-function [mu, Sigma] = initLandmarksSlam(z,Q,mu,Sigma)
+
+% Initiate Space Jam
+function [mu, Sigma] = initLandmarksSlam(z, Q, mu, Sigma)
     for i = 1:length(z)
        % separate z into r, B
        r = z(i, 1);

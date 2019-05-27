@@ -7,6 +7,8 @@
     % The function returns mu and Sigma after performing
     % an update step using the sensor readings of
     % the landmark   
+    
+% Update Space Jam
 function [mu, Sigma] = update_slam(landmarkID, zi, Q, mu, Sigma)
     % separate out variables
 	xR = mu(1);
