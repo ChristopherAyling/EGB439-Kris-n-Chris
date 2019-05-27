@@ -88,7 +88,6 @@ while true
     
     % predict step
     disp("Running predict step (predict_slam):")
-    mu
     [mu, Sigma] = predict_slam(mu, Sigma, d, dth, R)
     
     % sense
@@ -122,7 +121,6 @@ while true
             else
             	% update step 
                 disp("Updating (update_slam):")
-                mu
                 [mu, Sigma] = update_slam(currentID, z, Q, mu, Sigma)
             end
         end

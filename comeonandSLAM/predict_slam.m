@@ -20,7 +20,6 @@ function [mu,Sigma] =predict_slam(mu, Sigma, d, dth, R)
          	y + (d * sin(th));
          	wrapToPi(th + dth);
          ]
-    mu
     mu = [xt; mu(4:end)]
      
     % Jacobians Matrix Jx 
