@@ -1,3 +1,11 @@
+%{
+    Everybody get up it's time to slam now
+    We got a real jam goin' down
+    Welcome to the Space Jam
+    Here's your chance do your dance at the Space Jam
+    Alright
+%}
+
 Pb = PiBot('172.19.232.125');
 Pb.setLEDArray(bin2dec('0000000000000000'))
 Pb.resetEncoder();
@@ -52,20 +60,36 @@ currentGoal = [currentX currentY]';
 
 mode = "setup";
 
+idKeys = [30, 57, 27, 39, 45];
+idValues = [1, 2, 3, 4, 5];
+landmarkIDs = containers.Map(idKeys, idValues);
+currentID = -1;
+
 while true
     % get ticks and estimate new pose
     encoder = Pb.getEncoder();
     ticks = encoder-prevEncoder;
     prevEncoder = encoder;
     [d, th] = get_odom(mu, ticks);
+    
     % predict step
+    
     
     % sense
         % take photo
+    img = Pb.getImage();
         % process image
         % if we see a never before seen, run init landmarks
+    [binaryCode, centroidLocations] = identifyBeaconId(img);
+    for i = 1:length(binaryCode)
+        if ismember(binaryCode(i), idKeys)
+            currentID = landmarkIDs(binaryCode(i));
+            % update step 
+            [mu, Sigma] = update_slam(currentID, z, mu, Sigma, Q);
+        end
+    end
+    % run controller to calc new vw
     
-    % update step
     
     % calculate next movement
     switch mode
@@ -101,6 +125,8 @@ while true
         % update goal and plan new path
         % check if at centroid
             % park
+    % switch
+        % setup
         
     end
     
@@ -113,5 +139,6 @@ while true
     if mode == "complete"; break; end
     pause(dt);
 end
+Pb.stop();
 
 Pb.stop();
