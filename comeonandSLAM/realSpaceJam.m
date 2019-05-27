@@ -60,22 +60,26 @@ currentX = plannedPath(a, 1);
 currentY = plannedPath(a, 2);
 currentGoal = [currentX currentY]';
 
-% initialise mode
-mode = "setup";
+% initialise mode_
+mode_ = "setup";
 
 idKeys = [30, 57, 27, 39, 45];
 idValues = [1, 2, 3, 4, 5];
 landmarkIDs = containers.Map(idKeys, idValues);
 currentID = -1;
 
+disp("beginning mission")
 while true
+    disp("mode: " + mode_)
     % get ticks and estimate new pose
+    disp("calculating [d, dth] using odometry")
     encoder = Pb.getEncoder();
     ticks = encoder-prevEncoder;
     prevEncoder = encoder;
     [d, dth] = get_odom(mu, ticks);
     
     % predict step
+    disp("running predict step")
     [mu,Sigma] =predict_slam(mu, Sigma, d, dth, R);
     
     % sense
@@ -93,14 +97,12 @@ while true
             % update step 
             [mu, Sigma] = update_slam(currentID, z, mu, Sigma, Q);
         end
-    end
-    % run controller to calc new vw
-    
+    end    
     
     % calculate next movement
-    switch mode
+    switch mode_
         case "scan"
-            disp("going in circle")
+            disp("movement: going in circle")
             Pb.setVelocity([50 35]/2)
         otherwise
             loc = mu(1:2);
@@ -117,30 +119,30 @@ while true
                 closeEnough = dist < fd; % dist from current goal < following dist
             end
             
-            disp("pure pursuiting")
+            disp("movement: pure pursuiting")
             vw = purePursuit(currentGoal, mu(1:3), d, dt, first); first = false;
             vel = vw2wheels(vw, true);
             Pb.setVelocity(vel)
     end    
     
     % do some thinking and planning
-    switch mode
+    switch mode_
         case "setup"
             % check if in location to start scanning
             loc = mu(1:2);
             distanceFromGoal = pointDist(loc, goal);
             minDistanceFromGoal = 0.3;
             if distanceFromGoal < minDistanceFromGoal
-                % change mode to scan
-                mode = "scan";
+                % change mode_ to scan
+                mode_ = "scan";
             end
             
         case "scan"
             scanSteps = scanSteps + 1;
             % check if done scanning
             if scanSteps >= desiredScanSteps
-                % change mode to "d2c"
-                mode = "d2c";
+                % change mode_ to "d2c"
+                mode_ = "d2c";
             end
             
         case "d2c"
@@ -153,9 +155,9 @@ while true
             distanceFromGoal = pointDist(loc, goal);
             minDistanceFromGoal = 0.3;
             if distanceFromGoal < minDistanceFromGoal
-                % change mode to complete
+                % change mode_ to complete
                 disp("close enough to centroid, exiting")
-                mode = "complete";
+                mode_ = "complete";
             else
                 % plan new path
                 start = mu(1:2);
@@ -172,17 +174,15 @@ while true
                 % reset a
                 a = 1;
             end
-                
-        
     end
     
     % graphics
     
     % LEDS
-    displayMode(mode, Pb)
+    displaymode_(mode_, Pb);
     
     % break out of loop if everything is done
-    if mode == "complete"; break; end
+    if mode_ == "complete"; break; end
     pause(dt);
 end
 

@@ -1,5 +1,5 @@
-function displayMode(mode, Pb)
-    switch mode
+function displayMode(mode_, Pb)
+    switch mode_
         case "setup"
             Pb.setLEDArray(bin2dec('1000000000000000'))
         case "scan"
