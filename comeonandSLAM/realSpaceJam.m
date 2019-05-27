@@ -98,7 +98,7 @@ while true
         % if we see a never before seen, run init landmarks
     [binaryCode, centroidLocations] = identifyBeaconId(img);
     for i = 1:length(binaryCode)
-        if ismember(binaryCode(i), idBeacons)
+        if ismember(binaryCode(i), idBeacons) % in set of existing
             if ismember(idKeys, -1)
                 if ~ismember(idKeys, binaryCode(i))
                     for j = 1:length(idKeys)
@@ -112,6 +112,8 @@ while true
             end
             % Map landmark id to currentID (for easier indexing)
             disp("For the ID:")
+            i
+            binaryCode(i)
             currentID = landmarkIDs(binaryCode(i));
             % range and bearing / z
             z = [beaconDistance(centroidLocations(i, :)); beaconBearing(centroidLocations(i, :))];
