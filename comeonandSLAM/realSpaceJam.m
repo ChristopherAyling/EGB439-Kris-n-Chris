@@ -18,7 +18,8 @@ figure(1)
 axis square;
 grid on
 ARENASIZE = [2, 2];
-axis([0 ARENASIZE(1) 0 ARENASIZE(2)])
+zoom = 1;
+axis([0 ARENASIZE(1) 0 ARENASIZE(2)] + [-1 1 -1 1]*zoom)
 hold on
 
 % initialise
@@ -44,9 +45,9 @@ p = dx.query(startInPx);
 plannedPath = p/50;
 
 % EKF SLAM Initialisation
-Sigma = diag([1 1 5*pi/180]).^2;
-R = diag([.01 3*pi/180]).^2;
-Q = diag([.1 10*pi/180]).^2;
+Sigma = diag([0.1 0.1 0.1*pi/180]).^2;
+R = diag([.01 10*pi/180]).^2;
+Q = diag([.15 4*pi/180]).^2;
 
 % other config
 dt = 0.2;
@@ -88,7 +89,7 @@ while true
     
     % predict step
     disp("Running predict step (predict_slam):")
-    [mu, Sigma] = predict_slam(mu, Sigma, d, dth, R)
+    [mu, Sigma] = predict_slam(mu, Sigma, d, dth, R);
     
     % sense
         % take photo
@@ -97,7 +98,7 @@ while true
         % if we see a never before seen, run init landmarks
     [binaryCode, centroidLocations] = identifyBeaconId(img);
     for i = 1:length(binaryCode)
-        if ismember(binaryCode(i), idBeacons)
+        if ismember(binaryCode(i), idBeacons) % in set of existing
             if ismember(idKeys, -1)
                 if ~ismember(idKeys, binaryCode(i))
                     for j = 1:length(idKeys)
@@ -111,17 +112,19 @@ while true
             end
             % Map landmark id to currentID (for easier indexing)
             disp("For the ID:")
-            currentID = landmarkIDs(binaryCode(i))
+            i
+            binaryCode(i)
+            currentID = landmarkIDs(binaryCode(i));
             % range and bearing / z
             z = [beaconDistance(centroidLocations(i, :)); beaconBearing(centroidLocations(i, :))];
             if (seenLandmarks(currentID) == 0)
                 disp("Initialising (initLandmarksSlam):")
-                [mu, Sigma] = initLandmarksSlam(z, Q, mu, Sigma)
+                [mu, Sigma] = initLandmarksSlam(z, Q, mu, Sigma);
                 seenLandmarks(currentID) = 1;
             else
             	% update step 
                 disp("Updating (update_slam):")
-                [mu, Sigma] = update_slam(currentID, z, Q, mu, Sigma)
+                [mu, Sigma] = update_slam(currentID, z, Q, mu, Sigma);
             end
         end
     end
@@ -216,7 +219,7 @@ while true
     axis square;
     grid on
     ARENASIZE = [2, 2];
-    axis([0 ARENASIZE(1) 0 ARENASIZE(2)])
+    axis([0 ARENASIZE(1) 0 ARENASIZE(2)] + [-1 1 -1 1]*zoom)
     hold on
     % plot robot frame
     plotBotFrame(mu(1:3))
