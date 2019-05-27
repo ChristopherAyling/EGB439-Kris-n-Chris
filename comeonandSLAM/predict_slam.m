@@ -49,5 +49,5 @@ function [mu,Sigma] =predict_slam(mu, Sigma, d, dth, R)
            zeros(sigmaL, 2)
          ];
     
-    Sigma = jx * Sigma * jx' + ju * (R * ju'); 
+    Sigma = jx * Sigma * jx'; %+ ju * (R * ju'); 
 end
