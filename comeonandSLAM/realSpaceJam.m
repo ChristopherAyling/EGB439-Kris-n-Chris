@@ -10,6 +10,7 @@ qs = [];
 
 Pb = PiBot('172.19.232.125');
 Pb.setLEDArray(bin2dec('0000000000000000'))
+Pb.stop()
 Pb.resetEncoder();
 
 % set up plotting
@@ -67,7 +68,7 @@ currentGoal = [currentX currentY]';
 mode_ = "setup";
 
 takenPath = [mu(1:3)];
-idKeys = [-1, -1, -1, -1, -1];
+idKeys = [-1, -2, -3, -4, -5];
 idBeacons = [30, 57, 27, 39, 45];
 idValues = [1, 2, 3, 4, 5];
 landmarkIDs = containers.Map(idKeys, idValues);
@@ -77,6 +78,7 @@ disp("beginning mission")
 seenLandmarks = [0, 0, 0, 0, 0];
 seenLandmarks = containers.Map(idValues, seenLandmarks);
 
+map2 = containers.Map();
 
 while true
     disp("mode: " + mode_)
@@ -99,12 +101,15 @@ while true
     [binaryCode, centroidLocations] = identifyBeaconId(img);
     for i = 1:length(binaryCode)
         if ismember(binaryCode(i), idBeacons) % in set of existing
-            if ismember(idKeys, -1)
-                if ~ismember(idKeys, binaryCode(i))
+            if ismember(-1, idKeys)
+                if ~ismember(binaryCode(i), idKeys)
                     for j = 1:length(idKeys)
-                        if(idKeys(j) == -1)
-                            idKeys(j) = binaryCode(j);
-                            landmarkIDs = containers.Map(idKeys, idValues);
+                        if(idKeys(j) < 0)
+                            idKeys(j) = binaryCode(i)
+                            
+                            landmarkIDs = containers.Map(idKeys, idValues)
+                            cell2mat(landmarkIDs.keys)
+                            cell2mat(landmarkIDs.values)
                             break;
                         end
                     end
@@ -165,8 +170,8 @@ while true
         case "setup"
             % check if in location to start scanning
             loc = mu(1:2);
-            distanceFromGoal = pointDist(loc, goal);
-            minDistanceFromGoal = 0.3;
+            distanceFromGoal = pointDist(loc', goal);
+            minDistanceFromGoal = 0.5;
             if distanceFromGoal < minDistanceFromGoal
                 % change mode_ to scan
                 mode_ = "scan";
