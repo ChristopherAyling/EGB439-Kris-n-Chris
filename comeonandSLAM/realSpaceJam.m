@@ -65,6 +65,10 @@ idValues = [1, 2, 3, 4, 5];
 landmarkIDs = containers.Map(idKeys, idValues);
 currentID = -1;
 
+seenLandmarks = [0, 0, 0, 0, 0];
+seenLandmarks = containers.Map(idValues, seenLandmarks);
+
+
 while true
     % get ticks and estimate new pose
     encoder = Pb.getEncoder();
@@ -87,8 +91,13 @@ while true
             currentID = landmarkIDs(binaryCode(i));
             % range and bearing / z
             z = [beaconDistance(centroidLocations(i, :)); beaconBearing(centroidLocations(i, :))];
-            % update step 
-            [mu, Sigma] = update_slam(currentID, z, mu, Sigma, Q);
+            if (seenLandmarks(currentID) == 0)
+                [mu, Sigma] = initLandmarksSlam(z, Q, mu, Sigma);
+                seenLandmarks(currentID) = 1;
+            else
+            	% update step 
+                [mu, Sigma] = update_slam(currentID, z, mu, Sigma, Q);
+            end
         end
     end
     % run controller to calc new vw
@@ -114,7 +123,7 @@ while true
             end
             
             disp("pure pursuiting")
-            vw = purePursuit(currentGoal, q, d, dt, first); first = false;
+            %vw = purePursuit(currentGoal, q, d, dt, first); first = false;
             vel = vw2wheels(vw, true);
             Pb.setVelocity(vel)
     end    
