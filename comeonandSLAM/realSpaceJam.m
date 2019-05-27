@@ -184,6 +184,7 @@ while true
     end
     
     % graphics
+    disp("making pretty pictures")
     % plot robot frame
     plotBotFrame(mu(1:3))
     % plot robot covariance
