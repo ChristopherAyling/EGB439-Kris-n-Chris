@@ -10,31 +10,29 @@
 
 % Initiate Space Jam
 function [mu, Sigma] = initLandmarksSlam(z, Q, mu, Sigma)
-    for i = 1:length(z)
-       % separate z into r, B
-       r = z(1);
-       B = z(2);
+   % separate z into r, B
+   r = z(1);
+   B = z(2);
 
-       % seperate locs into x, y, z
-       x = mu(1);
-       y = mu(2);
-       thr = mu(3);
+   % seperate locs into x, y, z
+   x = mu(1);
+   y = mu(2);
+   thr = mu(3);
 
-       thrBWrapped = wrapToPi(thr + B);
-       % calc lNew
-       lNew = [
-                x + r * cos(thrBWrapped);
-                y + r * sin(thrBWrapped)
-              ];
+   thrBWrapped = wrapToPi(thr + B);
+   % calc lNew
+   lNew = [
+            x + r * cos(thrBWrapped);
+            y + r * sin(thrBWrapped)
+          ];
 
-       mu = [mu; lNew];
-       
-       lZ = [
-                cos(thrBWrapped), -r * sin(thrBWrapped);
-                sin(thrBWrapped), r * cos(thrBWrapped)
-            ];
-       zeroM = zeros(length(Sigma), 2);
-       Sigma = [Sigma,  zeroM; 
-                zeroM', (lZ * Q * lZ')];
-   end
+   mu = [mu; lNew];
+
+   lZ = [
+            cos(thrBWrapped), -r * sin(thrBWrapped);
+            sin(thrBWrapped), r * cos(thrBWrapped)
+        ];
+   zeroM = zeros(length(Sigma), 2);
+   Sigma = [Sigma,  zeroM; 
+            zeroM', (lZ * Q * lZ')];
 end

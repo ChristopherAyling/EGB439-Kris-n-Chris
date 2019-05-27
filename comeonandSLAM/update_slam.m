@@ -40,14 +40,14 @@ function [mu, Sigma] = update_slam(landmarkID, zi, Q, mu, Sigma)
                 -(xl - xR) / hR, -(yl - yR) / hR, 0;
                 (yl - yR) / (hR^2), -(xl - xR) / (hR^2), -1;
              ];
-    zeroM = zeros(2, length(Sigma) - 3);
-    G = [gTemp2, zeroM(:, 1:landmarkID*2 - 2), gTemp, zeroM(:, landmarkID*2 +1:end)];
+    zeroM = zeros(2, (length(Sigma) - 3));
+    G = [gTemp2, zeroM(:, 1:landmarkID*2 - 2), gTemp, zeroM(:, landmarkID*2 +1:end)]
     % K 
     SG = (Sigma * G');
     K = SG * (G * SG + Q)^-1;
 
     % Update ut
-    err = (zi - h')';
+    err = (zi' - h')';
     err(2) = wrapToPi(err(2));
     mu = mu + K * (err);
 

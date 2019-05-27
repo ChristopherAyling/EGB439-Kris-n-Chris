@@ -66,8 +66,8 @@ currentGoal = [currentX currentY]';
 mode_ = "setup";
 
 takenPath = [mu(1:3)];
-
-idKeys = [30, 57, 27, 39, 45];
+idKeys = [-1, -1, -1, -1, -1];
+idBeacons = [30, 57, 27, 39, 45];
 idValues = [1, 2, 3, 4, 5];
 landmarkIDs = containers.Map(idKeys, idValues);
 currentID = -1;
@@ -87,8 +87,9 @@ while true
     [d, dth] = get_odom(mu(1:3), ticks);
     
     % predict step
-    disp("running predict step")
-    [mu,Sigma] =predict_slam(mu, Sigma, d, dth, R);
+    disp("Running predict step (predict_slam):")
+    mu
+    [mu, Sigma] = predict_slam(mu, Sigma, d, dth, R)
     
     % sense
         % take photo
@@ -97,17 +98,32 @@ while true
         % if we see a never before seen, run init landmarks
     [binaryCode, centroidLocations] = identifyBeaconId(img);
     for i = 1:length(binaryCode)
-        if ismember(binaryCode(i), idKeys)
+        if ismember(binaryCode(i), idBeacons)
+            if ismember(idKeys, -1)
+                if ~ismember(idKeys, binaryCode(i))
+                    for j = 1:length(idKeys)
+                        if(idKeys(j) == -1)
+                            idKeys(j) = binaryCode(j);
+                            landmarkIDs = containers.Map(idKeys, idValues);
+                            break;
+                        end
+                    end
+                end
+            end
             % Map landmark id to currentID (for easier indexing)
-            currentID = landmarkIDs(binaryCode(i));
+            disp("For the ID:")
+            currentID = landmarkIDs(binaryCode(i))
             % range and bearing / z
             z = [beaconDistance(centroidLocations(i, :)); beaconBearing(centroidLocations(i, :))];
             if (seenLandmarks(currentID) == 0)
-                [mu, Sigma] = initLandmarksSlam(z, Q, mu, Sigma);
+                disp("Initialising (initLandmarksSlam):")
+                [mu, Sigma] = initLandmarksSlam(z, Q, mu, Sigma)
                 seenLandmarks(currentID) = 1;
             else
             	% update step 
-                [mu, Sigma] = update_slam(currentID, z, mu, Sigma, Q);
+                disp("Updating (update_slam):")
+                mu
+                [mu, Sigma] = update_slam(currentID, z, Q, mu, Sigma)
             end
         end
     end

@@ -12,16 +12,16 @@ function [mu,Sigma] =predict_slam(mu, Sigma, d, dth, R)
      % Seperating out prev. xt's theta (x, y are only used once so no need)
     x = mu(1);
     y = mu(2);
-    th = mu (3);
+    th = mu(3);
 
     % New xt/ut
     xt = [
             x + (d * cos(th));
          	y + (d * sin(th));
          	wrapToPi(th + dth);
-         ];
-    
-    mu = [xt; mu(4:end)]; 
+         ]
+    mu
+    mu = [xt; mu(4:end)]
      
     % Jacobians Matrix Jx 
     th = xt(3);
