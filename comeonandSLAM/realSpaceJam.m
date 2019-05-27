@@ -52,31 +52,38 @@ a = 1;
 d = 0.05;
 fd = 0.12;
 prevEncoder = [0 0];
+scanSteps = 0;
+desiredScanSteps = 100;
 
 % calcualte current goal
 currentX = plannedPath(a, 1);
 currentY = plannedPath(a, 2);
 currentGoal = [currentX currentY]';
 
-mode = "setup";
+% initialise mode_
+mode_ = "setup";
 
 idKeys = [30, 57, 27, 39, 45];
 idValues = [1, 2, 3, 4, 5];
 landmarkIDs = containers.Map(idKeys, idValues);
 currentID = -1;
 
+disp("beginning mission")
 seenLandmarks = [0, 0, 0, 0, 0];
 seenLandmarks = containers.Map(idValues, seenLandmarks);
 
 
 while true
+    disp("mode: " + mode_)
     % get ticks and estimate new pose
+    disp("calculating [d, dth] using odometry")
     encoder = Pb.getEncoder();
     ticks = encoder-prevEncoder;
     prevEncoder = encoder;
     [d, dth] = get_odom(mu, ticks);
     
     % predict step
+    disp("running predict step")
     [mu,Sigma] =predict_slam(mu, Sigma, d, dth, R);
     
     % sense
@@ -99,20 +106,19 @@ while true
                 [mu, Sigma] = update_slam(currentID, z, mu, Sigma, Q);
             end
         end
-    end
-    % run controller to calc new vw
-    
+    end    
     
     % calculate next movement
-    switch mode
+    switch mode_
         case "scan"
-            disp("going in circle")
+            disp("movement: going in circle")
             Pb.setVelocity([50 35]/2)
         otherwise
             loc = mu(1:2);
             dist = pointDist(loc, currentGoal');
             closeEnough = dist < fd;
             while closeEnough
+                disp("updating a")
                 a = min(a+1, length(plannedPath)); % set next point on path as current goal
                 % calculate current goal
                 currentX = plannedPath(a, 1);
@@ -122,6 +128,8 @@ while true
                 closeEnough = dist < fd; % dist from current goal < following dist
             end
             
+            disp("movement: pure pursuiting")
+            vw = purePursuit(currentGoal, mu(1:3), d, dt, first); first = false;
             disp("pure pursuiting")
             %vw = purePursuit(currentGoal, q, d, dt, first); first = false;
             vel = vw2wheels(vw, true);
@@ -129,38 +137,65 @@ while true
     end    
     
     % do some thinking and planning
-    switch mode
+    switch mode_
         case "setup"
             % check if in location to start scanning
             loc = mu(1:2);
             distanceFromGoal = pointDist(loc, goal);
             minDistanceFromGoal = 0.3;
             if distanceFromGoal < minDistanceFromGoal
-                % change mode to scan
-                mode = "scan";
+                % change mode_ to scan
+                mode_ = "scan";
             end
             
         case "scan"
+            scanSteps = scanSteps + 1;
             % check if done scanning
-                % change mode to "d2c"
+            if scanSteps >= desiredScanSteps
+                % change mode_ to "d2c"
+                mode_ = "d2c";
+            end
             
         case "d2c"
-            % calculate centroid
-            % update goal and plan new path
+            % calculate centroid (goal)
+            points = mu2points(mu);
+            [centroid, pgon] = calcCentroid(points);
+            goal = centroid;
             % check if at centroid
-                % park
-        
+            loc = mu(1:2);
+            distanceFromGoal = pointDist(loc, goal);
+            minDistanceFromGoal = 0.3;
+            if distanceFromGoal < minDistanceFromGoal
+                % change mode_ to complete
+                disp("close enough to centroid, exiting")
+                mode_ = "complete";
+            else
+                % plan new path
+                start = mu(1:2);
+                goalInPx = round(goal * pixelsInM);
+                startInPx = round(start * pixelsInM);
+
+                % compute path using distance transform
+                nav = zeros(100);
+                dx = DXform(nav);
+                dx.plan(goalInPx);
+                p = dx.query(startInPx);
+                plannedPath = p/50;
+                
+                % reset a
+                a = 1;
+            end
     end
     
     % graphics
     
     % LEDS
-    displayMode(mode, Pb)
+    displaymode_(mode_, Pb);
     
     % break out of loop if everything is done
-    if mode == "complete"; break; end
+    if mode_ == "complete"; break; end
     pause(dt);
 end
-Pb.stop();
 
 Pb.stop();
+disp("mission complete")
