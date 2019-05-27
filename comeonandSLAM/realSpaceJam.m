@@ -73,10 +73,10 @@ while true
     encoder = Pb.getEncoder();
     ticks = encoder-prevEncoder;
     prevEncoder = encoder;
-    [d, th] = get_odom(mu, ticks);
+    [d, dth] = get_odom(mu, ticks);
     
     % predict step
-    
+    [mu,Sigma] =predict_slam(mu, Sigma, d, dth, R);
     
     % sense
         % take photo
@@ -86,7 +86,10 @@ while true
     [binaryCode, centroidLocations] = identifyBeaconId(img);
     for i = 1:length(binaryCode)
         if ismember(binaryCode(i), idKeys)
+            % Map landmark id to currentID (for easier indexing)
             currentID = landmarkIDs(binaryCode(i));
+            % range and bearing / z
+            z = [beaconDistance(centroidLocations(i, :)); beaconBearing(centroidLocations(i, :))];
             % update step 
             [mu, Sigma] = update_slam(currentID, z, mu, Sigma, Q);
         end
