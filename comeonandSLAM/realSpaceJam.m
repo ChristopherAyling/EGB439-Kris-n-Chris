@@ -77,7 +77,13 @@ while true
             dist = pointDist(loc, currentGoal');
             closeEnough = dist < fd;
             while closeEnough
-               a = min(a 
+                a = min(a+1, length(plannedPath)); % set next point on path as current goal
+                % calculate current goal
+                currentX = plannedPath(a, 1);
+                currentY = plannedPath(a, 2);
+                currentGoal = [currentX currentY]';
+                dist = pointDist(loc, currentGoal');
+                closeEnough = dist < fd; % dist from current goal < following dist
             end
             
             disp("pure pursuiting")
@@ -89,18 +95,24 @@ while true
     % do some thinking and planning
     switch mode
         case "setup"
-        % check if done setting up
-            % change mode to scan
+            % check if in location to start scanning
+            loc = mu(1:2);
+            distanceFromGoal = pointDist(loc, goal);
+            minDistanceFromGoal = 0.3;
+            if distanceFromGoal < minDistanceFromGoal
+                % change mode to scan
+                mode = "scan";
+            end
             
         case "scan"
-        % check if done scanning
-            % change mode to "d2c"
+            % check if done scanning
+                % change mode to "d2c"
             
         case "d2c"
-        % calculate centroid
-        % update goal and plan new path
-        % check if at centroid
-            % park
+            % calculate centroid
+            % update goal and plan new path
+            % check if at centroid
+                % park
         
     end
     
