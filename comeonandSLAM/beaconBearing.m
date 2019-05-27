@@ -10,5 +10,5 @@ function [bearingFromBot] = beaconBearing(centroid)
     
     distToX = middleScreen - xLoc;
     bearingFromBot = (distToX * (hfov/2)) / middleScreen;
-    bearingFromBot = degtorad(bearingFromBot)
+    bearingFromBot = degtorad(bearingFromBot);
 end

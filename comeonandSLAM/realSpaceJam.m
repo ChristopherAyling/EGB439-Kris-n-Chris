@@ -6,6 +6,8 @@
     Alright
 %}
 
+qs = [];
+
 Pb = PiBot('172.19.232.125');
 Pb.setLEDArray(bin2dec('0000000000000000'))
 Pb.resetEncoder();
@@ -20,7 +22,7 @@ axis([0 ARENASIZE(1) 0 ARENASIZE(2)])
 hold on
 
 % initialise
-mu = [0.1, 0.1, 0];
+mu = [0.1; 0.1; 0];
 start = [mu(1), mu(2)];
 startTheta = mu(3);
 startTheta = degtorad(startTheta);
@@ -78,7 +80,7 @@ while true
     encoder = Pb.getEncoder();
     ticks = encoder-prevEncoder;
     prevEncoder = encoder;
-    [d, dth] = get_odom(mu, ticks);
+    [d, dth] = get_odom(mu(1:3), ticks);
     
     % predict step
     disp("running predict step")
@@ -185,6 +187,12 @@ while true
     
     % graphics
     disp("making pretty pictures")
+    clf
+    axis square;
+    grid on
+    ARENASIZE = [2, 2];
+    axis([0 ARENASIZE(1) 0 ARENASIZE(2)])
+    hold on
     % plot robot frame
     plotBotFrame(mu(1:3))
     % plot robot covariance
@@ -194,13 +202,19 @@ while true
     
     % plot planned path
     if strcmp(mode_, "setup") || strcmp(mode_, "d2c")
+        plot(currentX, currentY, 'kp')
         plotPlannedPath(plannedPath)
     end
     % plot path taken
     plotTakenPath(takenPath)
     
+    % temp
+    q = newPose(mu(1:3), ticks);
+    qs = [qs; q];
+    plotTakenPath(qs);
+    
     % LEDS
-    displaymode_(mode_, Pb);
+    displayMode(mode_, Pb);
     
     % break out of loop if everything is done
     if mode_ == "complete"; break; end
