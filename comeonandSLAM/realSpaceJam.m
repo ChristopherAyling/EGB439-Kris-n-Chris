@@ -12,11 +12,11 @@ axis([0 ARENASIZE(1) 0 ARENASIZE(2)])
 hold on
 
 % initialise
-q = [0.1, 0.1, 0];
-start = [q(1), q(2)];
-startTheta = q(3);
+mu = [0.1, 0.1, 0];
+start = [mu(1), mu(2)];
+startTheta = mu(3);
 startTheta = degtorad(startTheta);
-q = [start, startTheta];
+mu = [start, startTheta];
 first = true;
 
 goal = [0.6 1.2]; % set goal here
@@ -43,7 +43,6 @@ dt = 0.2;
 a = 1;
 d = 0.05;
 fd = 0.12;
-steps = 100;
 prevEncoder = [0 0];
 
 % calcualte current goal
@@ -51,7 +50,7 @@ currentX = plannedPath(a, 1);
 currentY = plannedPath(a, 2);
 currentGoal = [currentX currentY]';
 
-mode = "";
+mode = "setup";
 
 while true
     % get ticks and estimate new pose
@@ -64,17 +63,55 @@ while true
     % sense
         % take photo
         % process image
+        % if we see a never before seen, run init landmarks
     
     % update step
     
-    % run controller to calc new vw
+    % calculate next movement
+    switch mode
+        case "scan"
+            disp("going in circle")
+            Pb.setVelocity([50 35]/2)
+        otherwise
+            loc = mu(1:2);
+            dist = pointDist(loc, currentGoal');
+            closeEnough = dist < fd;
+            while closeEnough
+               a = min(a 
+            end
+            
+            disp("pure pursuiting")
+            vw = purePursuit(currentGoal, q, d, dt, first); first = false;
+            vel = vw2wheels(vw, true);
+            Pb.setVelocity(vel)
+    end    
     
-    % switch
-        % setup
+    % do some thinking and planning
+    switch mode
+        case "setup"
+        % check if done setting up
+            % change mode to scan
+            
+        case "scan"
+        % check if done scanning
+            % change mode to "d2c"
+            
+        case "d2c"
+        % calculate centroid
+        % update goal and plan new path
+        % check if at centroid
+            % park
         
-        % scan
-        
-        % drive to centroid
+    end
     
+    % graphics
+    
+    % LEDS
+    displayMode(mode, Pb)
+    
+    % break out of loop if everything is done
+    if mode == "complete"; break; end
+    pause(dt);
 end
-Pb.stop()
+
+Pb.stop();
