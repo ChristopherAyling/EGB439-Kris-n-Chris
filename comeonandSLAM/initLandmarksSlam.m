@@ -12,8 +12,8 @@
 function [mu, Sigma] = initLandmarksSlam(z, Q, mu, Sigma)
     for i = 1:length(z)
        % separate z into r, B
-       r = z(i, 1);
-       B = z(i, 2);
+       r = z(1);
+       B = z(2);
 
        % seperate locs into x, y, z
        x = mu(1);
