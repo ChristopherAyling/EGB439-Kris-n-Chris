@@ -8,8 +8,8 @@ hold on
 
 q = [0, 0, 0];
 
-plotBeacon([1.5, 1.5], 32)
-plotBeacon([1, 1.5], 63)
+plotBeacon([1.5, 1.5], 27)
+plotBeacon([1, 1.5], 45)
 plotBeacon([0.5, 1.5], 57)
 
 t = 0;

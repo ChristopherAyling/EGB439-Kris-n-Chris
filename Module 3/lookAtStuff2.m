@@ -22,6 +22,21 @@ first = true;
 
 goal = [0.6 1.2]; % set goal here
 
+% landmarks
+landmarks = containers.Map();
+landmarks(dec2bin(27, 6)) = [1.7; 1.9];
+landmarks(dec2bin(39, 6)) = [0.3; 1.9];
+landmarks(dec2bin(45, 6)) = [0.1; 0.1];
+landmarks(dec2bin(30, 6)) = [1; 0.1];
+landmarks(dec2bin(57, 6)) = [1.9; 0.1];
+
+plotLandmarks(landmarks)
+
+% EKF Localisation setup
+Sigma = diag([1 1 10*pi/180]).^2;
+R = diag([.01 3*pi/180]).^2;
+Q = diag([.1 10*pi/180]).^2;
+
 % convert from real to px units
 pixelsInM = 50;
 goalInPx = round(goal * pixelsInM);
@@ -108,7 +123,7 @@ for i = 1:steps
         disp("doing laps")
         c = 0;
         maxSteps = 125;
-        landmarks = containers.Map();
+        mu = q;
         while c < maxSteps
             c = c + 1;
             ticks = Pb.getEncoder();
@@ -116,6 +131,10 @@ for i = 1:steps
             Pb.resetEncoder();
             Pb.setVelocity([50 35]/2);
             q = newPose(q, ticks);
+            [d, dth] = get_odom(mu, ticks);
+            % predict step
+            [mu, Sigma] = predict_step(mu, Sigma, d, dth, R);
+            
             % take photo
             img = Pb.getImage();
             plotBotFrame(q);
@@ -123,8 +142,9 @@ for i = 1:steps
             % analyse photo
             [binaryCode, centroidLocations] = identifyBeaconId(img);
             % process results
+            z = containers.Map();
             for idx=1:length(binaryCode)
-                if binaryCode(idx) ~= -1
+                if binaryCode(idx) ~= -1 && binaryCode(idx) ~= 54
                   
                     range = beaconDistance(centroidLocations(idx,:));
                     b = beaconBearing(centroidLocations(idx,:));
@@ -138,9 +158,13 @@ for i = 1:steps
                     ];
 
                     plotBeacon(loc, binaryCode(idx))
-                    landmarks(binaryCode(idx)) = loc;
+                    z(dec2bin(binaryCode(idx), 6)) = loc;
                 end
             end
+            % update step
+            [mu, Sigma] = update_step(landmarks, z, mu, Sigma, Q);
+            plot(mu(1), mu(2), 'bp', 'MarkerSize', 8)
+            plot_cov(mu, Sigma, 3)
             pause(0.2)
         end
         break 
@@ -173,4 +197,81 @@ function r = range_(p1, p2)
     y2 = p2(2);
     
     r = sqrt((x1-x2)^2 + (y1-y2)^2);
+end
+
+function [xt,S] = predict_step(xt,S,d,dth,R)
+    x = xt(1);
+    y = xt(2);
+    theta = xt(3);
+
+    xt = [
+        x+(d*cos(theta));
+        y+(d*sin(theta));
+        wrapToPi(theta+dth);
+    ];
+
+    Jx = [
+        1 0 -d*sin(theta);
+        0 1 d*cos(theta);
+        0 0 1;
+    ];
+
+    Ju = [
+        cos(theta) 0;
+        sin(theta) 0;
+        0 1;
+    ];
+
+    S = Jx*S*Jx' + Ju*R*Ju'; 
+end
+
+function [x,S] = update_step(map,Z,x,S,Q)
+    zks = keys(Z);
+    mks = keys(map);
+    
+    for i=1:length(Z)
+        z = Z(zks{i})';
+        xr = x(1);
+        yr = x(2);
+        theta = x(3);
+        lm = map(zks{i})';
+
+        r = z(1);
+        b = z(2);
+
+        xl = lm(1);
+        yl = lm(2);
+
+        G = [
+            -(xl-xr)/r, -(yl-yr)/r, 0;
+            (yl-yr)/(r*r), -(xl-xr)/(r*r), -1;
+        ];
+
+        h = [
+            sqrt((xl-xr)^2+(yl-yr)^2)
+            wrapToPi(atan2(yl-yr, xl-xr)-theta)
+        ];
+
+        K = S*G'*(G*S*G' + Q)^-1;
+
+        err = z(:)-h';
+        err = [err(1); wrapToPi(err(2))];
+        x = x + K*(err);
+        x = [x(1), x(2), wrapToPi(x(3))]';
+        S = (eye(length(K)) - K*G)*S;
+    end
+end
+
+function plot_cov(x,P,nSigma)
+    disp("plotting cov")
+    P = P(1:2,1:2);
+    x = x(1:2);
+    if(~any(diag(P)==0))
+        disp("plotting cov with diag")
+        [V,D] = eig(P);
+        y = nSigma*[cos(0:0.1:2*pi);sin(0:0.1:2*pi)];
+        el = V*sqrtm(D)*y;
+        el = [el el(:,1)]+repmat(x,1,size(el,2)+1);
+        line(el(1,:),el(2,:), 'Color', [0.3010 0.7450 0.9330], 'LineStyle', '--', 'LineWidth', 1.5);
+    end
 end

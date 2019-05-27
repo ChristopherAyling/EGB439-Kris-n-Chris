@@ -13,15 +13,20 @@ function plotBeacon(loc, id)
     x = loc(1);
     y = loc(2);
     
-    plot(x, y, 'ko', 'MarkerSize', 8, 'LineWidth', 3)
+    keySet = {'111001','110110','100111','011011', '101101', '011110'};
+    valueSet = {'m', 'c', 'r', 'g', 'b', 'y'};
+    M = containers.Map(keySet,valueSet);
     
     if nargin > 1
         % if id is bitstring, convert it to number
         if ischar(id) || isstring(id)
            id = bin2dec(id);
         end
+        id
+        plot(x, y, M(dec2bin(id, 6))+"o", 'MarkerSize', 8, 'LineWidth', 3)
         text(x+0.03, y+0.04, num2str(id), 'fontName','Comic Sans MS')
-%         text(x+0.03, y-0.04, dec2bin(id), 'fontName','Comic Sans MS')
+    else
+        plot(x, y, 'ko', 'MarkerSize', 8, 'LineWidth', 3)
     end
 end
 
