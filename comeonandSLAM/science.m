@@ -33,35 +33,13 @@ landmarks(dec2bin(45, 6)) = [1.9; 0.7];
 plotLandmarks(landmarks)
 
 % initialise
-mu = [0.5; 1; 0];
-start = [mu(1), mu(2)];
-startTheta = mu(3);
-startTheta = degtorad(startTheta);
-mu = [start, startTheta];
-first = true;
-
-goal = [1.5 1]; % set goal here
-
-% convert from real to px units
-pixelsInM = 50;
-goalInPx = round(goal * pixelsInM);
-startInPx = round(start * pixelsInM);
-
-% compute path using distance transform
-nav = zeros(100);
-dx = DXform(nav);
-dx.plan(goalInPx);
-p = dx.query(startInPx);
-plannedPath = p/50;
+mu = [0.5; 1; deg2rad(0)];
 
 % other config
-dt = 0.2;
-a = 1;
-d = 0.05;
-fd = 0.12;
+dt = 0.25;
+
+% encoder setup
 prevEncoder = [0 0];
-scanSteps = 0;
-desiredScanSteps = 100;
 
 % calcualte current goal
 currentX = plannedPath(a, 1);
@@ -83,13 +61,19 @@ seenLandmarks = containers.Map(idValues, seenLandmarks);
 
 % EKF Initialisations 
 Sigma = diag([0.1 0.1 0.1*pi/180]).^2;
-R = diag([.01 10*pi/180]).^2; % dependant variable
-Q = diag([.15 4*pi/180]).^2; % dependant variable
+R = diag([.01 10*pi/180]).^2; % independant variable
+Q = diag([.15 4*pi/180]).^2; % independant variable
 
-% 
+% Data collection structures
+oracleLocalisations = [];
+EKFLocalisations = [];
+
+% start moving
+Pb.setVelocity([50, 50])
 
 disp("And when you're dying I'll be still alive")
 while true
+    disp("mode: " + mode_)
     % Predict Step
     [x,S] = predictStepReport(x,S,d,dth,R);
     
@@ -99,8 +83,11 @@ while true
     % Update Step
     [x,S] = updateStepReport(map,z,x,S,Q);    
     
+    % Data collection
+    oracleLocalisation = getPose(pb);
+    oracleLocalisations = [oracleLocalisations; oracleLocalisation];
+    EKFLocalisations = [EKFLocalisations; mu(1:3)'];
     
-    disp("mode: " + mode_)
     % get ticks and estimate new pose
     disp("calculating [d, dth] using odometry")
     encoder = Pb.getEncoder();
@@ -178,12 +165,13 @@ while true
     vel = vw2wheels(vw, true);
     Pb.setVelocity(vel)  
     
-    % Check if reached goal
-    loc = mu(1:2);
-    distanceFromGoal = pointDist(loc', goal);
-    minDistanceFromGoal = 0.5;
-    if distanceFromGoal < minDistanceFromGoal
-        % change mode_ to scan
+    % Check if stopped moving
+    loc = oracleLocalisation(1:2);
+    prevLoc = oracleLocalisations(end, 1:2);
+    distanceMoved = pointDist(loc', prevLoc);
+    threshold = 0.05;
+    if distanceMoved < threshold
+        % change mode to complete.
         mode_ = "complete";
     end
     
@@ -210,11 +198,6 @@ while true
     % plot path taken
     plotTakenPath(takenPath)
     
-    % temp
-    q = newPose(mu(1:3), ticks);
-    qs = [qs; q];
-    plotTakenPath(qs);
-    
     % LEDS
     displayMode(mode_, Pb);
     
@@ -225,3 +208,7 @@ end
 
 Pb.stop();
 disp("And when you're dead I will be still alive")
+
+% Save data
+fname = datestr(datetime('now'));
+save(fname); % save all variables in workspace, it just makes things easier
