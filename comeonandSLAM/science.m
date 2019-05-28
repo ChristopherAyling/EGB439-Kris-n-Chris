@@ -86,6 +86,8 @@ Sigma = diag([0.1 0.1 0.1*pi/180]).^2;
 R = diag([.01 10*pi/180]).^2; % dependant variable
 Q = diag([.15 4*pi/180]).^2; % dependant variable
 
+idBeacons = [30, 57, 27, 39, 45];
+
 disp("And when you're dying I'll be still alive")
 while true
     % get ticks and estimate new pose
@@ -101,9 +103,11 @@ while true
     img = Pb.getImage();
     [binaryCode, centroidLocations] = identifyBeaconId(img);
     for i = 1:length(binaryCode)
-        z = [beaconDistance(centroidLocations(i, :)); beaconBearing(centroidLocations(i, :))];
-        % Update Step
-        [mu, Sigma] = updateStepReport(landmarks, z, mu, Sigma, Q);    
+        if ismember(binaryCode(i), idBeacons) % in set of existing
+        	z = [beaconDistance(centroidLocations(i, :)); beaconBearing(centroidLocations(i, :))];
+            % Update Step
+            [mu, Sigma] = updateStepReport(landmarks, z, mu, Sigma, Q);    
+        end
     end
     
         
