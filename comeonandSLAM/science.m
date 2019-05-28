@@ -83,6 +83,16 @@ seenLandmarks = containers.Map(idValues, seenLandmarks);
 map2 = containers.Map();
 
 while true
+    % Predict Step
+    [x,S] = predictStepReport(x,S,d,dth,R);
+    
+    % Sense Step
+    z = [beaconDistance(centroidLocations(i, :)); beaconBearing(centroidLocations(i, :))];
+    
+    % Update Step
+    [x,S] = updateStepReport(map,z,x,S,Q);    
+    
+    
     disp("mode: " + mode_)
     % get ticks and estimate new pose
     disp("calculating [d, dth] using odometry")
