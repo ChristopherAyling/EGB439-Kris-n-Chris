@@ -100,17 +100,13 @@ while true
     % Sense Step
     img = Pb.getImage();
     [binaryCode, centroidLocations] = identifyBeaconId(img);
-    z = [beaconDistance(centroidLocations(i, :)); beaconBearing(centroidLocations(i, :))];
+    for i = 1:length(binaryCode)
+        z = [beaconDistance(centroidLocations(i, :)); beaconBearing(centroidLocations(i, :))];
+        % Update Step
+        [mu, Sigma] = updateStepReport(landmarks, z, mu, Sigma, Q);    
+    end
     
-    % Update Step
-    [mu, Sigma] = updateStepReport(landmarks, z, mu, Sigma, Q);    
-    
-    
-    % predict step
-    disp("Running predict step (predict_slam):")
-    [mu, Sigma] = predict_slam(mu, Sigma, d, dth, R);
-    
-    
+        
     % ----------- Not Sure About the stuff below this comment -----------
     
     % record calculated pose
