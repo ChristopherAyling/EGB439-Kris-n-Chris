@@ -86,72 +86,32 @@ Sigma = diag([0.1 0.1 0.1*pi/180]).^2;
 R = diag([.01 10*pi/180]).^2; % dependant variable
 Q = diag([.15 4*pi/180]).^2; % dependant variable
 
-% 
-
 disp("And when you're dying I'll be still alive")
 while true
-    % Predict Step
-    [x,S] = predictStepReport(x,S,d,dth,R);
-    
-    % Sense Step
-    z = [beaconDistance(centroidLocations(i, :)); beaconBearing(centroidLocations(i, :))];
-    
-    % Update Step
-    [x,S] = updateStepReport(map,z,x,S,Q);    
-    
-    
-    disp("mode: " + mode_)
     % get ticks and estimate new pose
-    disp("calculating [d, dth] using odometry")
     encoder = Pb.getEncoder();
     ticks = encoder-prevEncoder;
     prevEncoder = encoder;
     [d, dth] = get_odom(mu(1:3), ticks);
     
+    % Predict Step
+    [mu, Sigma] = predictStepReport(mu, Sigma, d, dth, R);
+    
+    % Sense Step
+    img = Pb.getImage();
+    [binaryCode, centroidLocations] = identifyBeaconId(img);
+    z = [beaconDistance(centroidLocations(i, :)); beaconBearing(centroidLocations(i, :))];
+    
+    % Update Step
+    [mu, Sigma] = updateStepReport(landmarks, z, mu, Sigma, Q);    
+    
+    
     % predict step
     disp("Running predict step (predict_slam):")
     [mu, Sigma] = predict_slam(mu, Sigma, d, dth, R);
     
-    % sense
-        % take photo
-    img = Pb.getImage();
-        % process image
-        % if we see a never before seen, run init landmarks
-    [binaryCode, centroidLocations] = identifyBeaconId(img);
-    for i = 1:length(binaryCode)
-        if ismember(binaryCode(i), idBeacons) % in set of existing
-            if ismember(-1, idKeys)
-                if ~ismember(binaryCode(i), idKeys)
-                    for j = 1:length(idKeys)
-                        if(idKeys(j) < 0)
-                            idKeys(j) = binaryCode(i)
-                            
-                            landmarkIDs = containers.Map(idKeys, idValues)
-                            cell2mat(landmarkIDs.keys)
-                            cell2mat(landmarkIDs.values)
-                            break;
-                        end
-                    end
-                end
-            end
-            % Map landmark id to currentID (for easier indexing)
-            disp("For the ID:")
-            i
-            binaryCode(i)
-            currentID = landmarkIDs(binaryCode(i));
-            % range and bearing / z
-            z = [beaconDistance(centroidLocations(i, :)); beaconBearing(centroidLocations(i, :))];
-            if (seenLandmarks(currentID) == 0)
-                disp("Initialising (initLandmarksSlam):")
-                [mu, Sigma] = initLandmarksSlam(z, Q, mu, Sigma);
-                seenLandmarks(currentID) = 1;
-            else
-            	% update step 
-                disp("Updating (update_slam):")
-                [mu, Sigma] = update_slam(currentID, z, Q, mu, Sigma);
-            end
-        end
-    end
+    
+    % ----------- Not Sure About the stuff below this comment -----------
     
     % record calculated pose
     takenPath = [takenPath; mu(1:3)'];
