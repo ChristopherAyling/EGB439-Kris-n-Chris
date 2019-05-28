@@ -1,6 +1,6 @@
 function [x,S] = updateStepReport(map,z,x,S,Q)
     % For each landmark...
-    for i = 1:length(z)
+
         % separate out variables
         xr = x(1);
         yr = x(2);
@@ -8,11 +8,11 @@ function [x,S] = updateStepReport(map,z,x,S,Q)
         
         % we just need ri from z (the second index is Bi, but we don't need
         % it nto be separated)
-        r = z(i, 1);
+        r = z(1, 1);
 
         % we'll need the xl and xr vars separated
-        xl = map(i, 1);
-        yl = map(i, 2);
+        xl = map(1, 1);
+        yl = map(1, 2);
 
         % G Jacobians Matrix
         G = [
@@ -31,7 +31,7 @@ function [x,S] = updateStepReport(map,z,x,S,Q)
         K = SG * (G * SG + Q)^-1;
         
         % Update ut
-        err = (z(i, :) - h')';
+        err = (z(1, :) - h')';
         err(2) = wrapToPi(err(2));
         x = x + K * (err);
        
@@ -39,5 +39,4 @@ function [x,S] = updateStepReport(map,z,x,S,Q)
         % sigmaT
         I = eye(length(K));
         S = (I - K * G) * S;
-    end
 end    

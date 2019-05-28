@@ -8,9 +8,9 @@
     Still alive.
 %}
 
-qs = [];
+clear
 
-Pb = PiBot('172.19.232.125');
+Pb = PiBot('172.19.232.125', '172.19.232.12', 32);
 Pb.setLEDArray(bin2dec('0000000000000000'))
 Pb.stop()
 Pb.resetEncoder();
@@ -32,6 +32,10 @@ landmarks(dec2bin(39, 6)) = [1.9; 1.0];
 landmarks(dec2bin(45, 6)) = [1.9; 0.7];
 plotLandmarks(landmarks)
 
+mappyboi = [1.9, 1.3;
+            1.9, 1.0;
+            1.9, 0.7];
+
 % initialise
 mu = [0.5; 1; deg2rad(0)];
 
@@ -41,23 +45,11 @@ dt = 0.25;
 % encoder setup
 prevEncoder = [0 0];
 
-% calcualte current goal
-currentX = plannedPath(a, 1);
-currentY = plannedPath(a, 2);
-currentGoal = [currentX currentY]';
-
-% initialise mode_
-mode_ = "moving";
-
-takenPath = [mu(1:3)];
-idKeys = [-1, -2, -3, -4, -5];
-idBeacons = [30, 57, 27, 39, 45];
-idValues = [1, 2, 3, 4, 5];
-landmarkIDs = containers.Map(idKeys, idValues);
-currentID = -1;
-
-seenLandmarks = [0, 0, 0, 0, 0];
-seenLandmarks = containers.Map(idValues, seenLandmarks);
+% make instructions
+instruction = [10, 10];
+steps = 20;
+instructions = repmat(instruction, steps, 1);
+stepsTaken = 0;
 
 % EKF Initialisations 
 Sigma = diag([0.1 0.1 0.1*pi/180]).^2;
@@ -67,113 +59,44 @@ Q = diag([.15 4*pi/180]).^2; % independant variable
 % Data collection structures
 oracleLocalisations = [];
 EKFLocalisations = [];
+images = {};
 
-% start moving
-Pb.setVelocity([50, 50])
+idBeacons = [27, 39, 45];
 
 disp("And when you're dying I'll be still alive")
-while true
-    disp("mode: " + mode_)
-    % Predict Step
-    [x,S] = predictStepReport(x,S,d,dth,R);
-    
-    % Sense Step
-    z = [beaconDistance(centroidLocations(i, :)); beaconBearing(centroidLocations(i, :))];
-    
-    % Update Step
-    [x,S] = updateStepReport(map,z,x,S,Q);    
-    
-    % Data collection
-    oracleLocalisation = getPose(pb);
-    oracleLocalisations = [oracleLocalisations; oracleLocalisation];
-    EKFLocalisations = [EKFLocalisations; mu(1:3)'];
-    
+tic
+for instruction = instructions'
+    disp("steps taken: "+stepsTaken+"/"+steps)
     % get ticks and estimate new pose
-    disp("calculating [d, dth] using odometry")
     encoder = Pb.getEncoder();
     ticks = encoder-prevEncoder;
     prevEncoder = encoder;
     [d, dth] = get_odom(mu(1:3), ticks);
     
-    % predict step
-    disp("Running predict step (predict_slam):")
-    [mu, Sigma] = predict_slam(mu, Sigma, d, dth, R);
+    % Predict Step
+    [mu, Sigma] = predictStepReport(mu, Sigma, d, dth, R);
     
-    % sense
-        % take photo
+    % Sense Step
     img = Pb.getImage();
-        % process image
-        % if we see a never before seen, run init landmarks
     [binaryCode, centroidLocations] = identifyBeaconId(img);
     for i = 1:length(binaryCode)
         if ismember(binaryCode(i), idBeacons) % in set of existing
-            if ismember(-1, idKeys)
-                if ~ismember(binaryCode(i), idKeys)
-                    for j = 1:length(idKeys)
-                        if(idKeys(j) < 0)
-                            idKeys(j) = binaryCode(i)
-                            
-                            landmarkIDs = containers.Map(idKeys, idValues)
-                            cell2mat(landmarkIDs.keys)
-                            cell2mat(landmarkIDs.values)
-                            break;
-                        end
-                    end
-                end
-            end
-            % Map landmark id to currentID (for easier indexing)
-            disp("For the ID:")
-            i
-            binaryCode(i)
-            currentID = landmarkIDs(binaryCode(i));
-            % range and bearing / z
-            z = [beaconDistance(centroidLocations(i, :)); beaconBearing(centroidLocations(i, :))];
-            if (seenLandmarks(currentID) == 0)
-                disp("Initialising (initLandmarksSlam):")
-                [mu, Sigma] = initLandmarksSlam(z, Q, mu, Sigma);
-                seenLandmarks(currentID) = 1;
-            else
-            	% update step 
-                disp("Updating (update_slam):")
-                [mu, Sigma] = update_slam(currentID, z, Q, mu, Sigma);
-            end
+        	z = [beaconDistance(centroidLocations(i, :)); beaconBearing(centroidLocations(i, :))];
+            % Update Step
+            [mu, Sigma] = updateStepReport(mappyboi, z, mu, Sigma, Q);    
         end
     end
     
-    % record calculated pose
-    takenPath = [takenPath; mu(1:3)'];
+    % Act Step
+    disp("executing instruction");
+    Pb.setVelocity(instruction');
     
-    % calculate next movement
-    loc = mu(1:2);
-    dist = pointDist(loc, currentGoal');
-    closeEnough = dist < fd;
-    while closeEnough
-        disp("updating a")
-        a = min(a+1, length(plannedPath)); % set next point on path as current goal
-        % calculate current goal
-        currentX = plannedPath(a, 1);
-        currentY = plannedPath(a, 2);
-        currentGoal = [currentX currentY]';
-        dist = pointDist(loc, currentGoal');
-        closeEnough = dist < fd; % dist from current goal < following dist
-    end
-
-    disp("movement: pure pursuiting")
-    vw = purePursuit(currentGoal, mu(1:3), d, dt, first); first = false;
-    disp("pure pursuiting")
-    %vw = purePursuit(currentGoal, q, d, dt, first); first = false;
-    vel = vw2wheels(vw, true);
-    Pb.setVelocity(vel)  
+    % Data collection
+    oracleLocalisation = getPose(Pb);
+    oracleLocalisations = [oracleLocalisations; oracleLocalisation];
+    EKFLocalisations = [EKFLocalisations; mu(1:3)'];
+    images{stepsTaken+1} = img;
     
-    % Check if stopped moving
-    loc = oracleLocalisation(1:2);
-    prevLoc = oracleLocalisations(end, 1:2);
-    distanceMoved = pointDist(loc', prevLoc);
-    threshold = 0.05;
-    if distanceMoved < threshold
-        % change mode to complete.
-        mode_ = "complete";
-    end
     
     % graphics
     disp("making pretty pictures")
@@ -191,24 +114,21 @@ while true
     % plot landmark mus & covs
     plot_landmarks(mu(4:end), Sigma(4:end, 4:end))
     
-    % plot planned path
-    plot(currentX, currentY, 'kp')
-    plotPlannedPath(plannedPath)
-    
     % plot path taken
-    plotTakenPath(takenPath)
+    plotTakenPath(oracleLocalisations, "b");
+    plotTakenPath(EKFLocalisations, "r");
     
-    % LEDS
-    displayMode(mode_, Pb);
-    
-    % break out of loop if everything is done
-    if mode_ == "complete"; break; end
+    % plot landmarks
+    plotLandmarks(landmarks)
+
     pause(dt);
+    stepsTaken = stepsTaken+1;
 end
+toc
 
 Pb.stop();
 disp("And when you're dead I will be still alive")
 
 % Save data
-fname = datestr(datetime('now'));
+fname = char(java.util.UUID.randomUUID);
 save(fname); % save all variables in workspace, it just makes things easier
