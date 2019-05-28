@@ -21,19 +21,26 @@ figure(1)
 axis square;
 grid on
 ARENASIZE = [2, 2];
-zoom = 1;
+zoom = 0;
 axis([0 ARENASIZE(1) 0 ARENASIZE(2)] + [-1 1 -1 1]*zoom)
 hold on
 
+% landmark initialisation
+landmarks = containers.Map();
+landmarks(dec2bin(27, 6)) = [1.9; 1.3];
+landmarks(dec2bin(39, 6)) = [1.9; 1.0];
+landmarks(dec2bin(45, 6)) = [1.9; 0.7];
+plotLandmarks(landmarks)
+
 % initialise
-mu = [0.1; 0.1; 0];
+mu = [0.5; 1; 0];
 start = [mu(1), mu(2)];
 startTheta = mu(3);
 startTheta = degtorad(startTheta);
 mu = [start, startTheta];
 first = true;
 
-goal = [0.6 1.2]; % set goal here
+goal = [1.5 1]; % set goal here
 
 % convert from real to px units
 pixelsInM = 50;
@@ -46,11 +53,6 @@ dx = DXform(nav);
 dx.plan(goalInPx);
 p = dx.query(startInPx);
 plannedPath = p/50;
-
-% EKF SLAM Initialisation
-Sigma = diag([0.1 0.1 0.1*pi/180]).^2;
-R = diag([.01 10*pi/180]).^2;
-Q = diag([.15 4*pi/180]).^2;
 
 % other config
 dt = 0.2;
@@ -67,7 +69,7 @@ currentY = plannedPath(a, 2);
 currentGoal = [currentX currentY]';
 
 % initialise mode_
-mode_ = "setup";
+mode_ = "moving";
 
 takenPath = [mu(1:3)];
 idKeys = [-1, -2, -3, -4, -5];
@@ -76,12 +78,17 @@ idValues = [1, 2, 3, 4, 5];
 landmarkIDs = containers.Map(idKeys, idValues);
 currentID = -1;
 
-disp("beginning mission")
 seenLandmarks = [0, 0, 0, 0, 0];
 seenLandmarks = containers.Map(idValues, seenLandmarks);
 
-map2 = containers.Map();
+% EKF Initialisations 
+Sigma = diag([0.1 0.1 0.1*pi/180]).^2;
+R = diag([.01 10*pi/180]).^2; % dependant variable
+Q = diag([.15 4*pi/180]).^2; % dependant variable
 
+% 
+
+disp("And when you're dying I'll be still alive")
 while true
     % Predict Step
     [x,S] = predictStepReport(x,S,d,dth,R);
@@ -150,84 +157,34 @@ while true
     takenPath = [takenPath; mu(1:3)'];
     
     % calculate next movement
-    switch mode_
-        case "scan"
-            disp("movement: going in circle")
-            Pb.setVelocity([50 35]/2)
-        otherwise
-            loc = mu(1:2);
-            dist = pointDist(loc, currentGoal');
-            closeEnough = dist < fd;
-            while closeEnough
-                disp("updating a")
-                a = min(a+1, length(plannedPath)); % set next point on path as current goal
-                % calculate current goal
-                currentX = plannedPath(a, 1);
-                currentY = plannedPath(a, 2);
-                currentGoal = [currentX currentY]';
-                dist = pointDist(loc, currentGoal');
-                closeEnough = dist < fd; % dist from current goal < following dist
-            end
-            
-            disp("movement: pure pursuiting")
-            vw = purePursuit(currentGoal, mu(1:3), d, dt, first); first = false;
-            disp("pure pursuiting")
-            %vw = purePursuit(currentGoal, q, d, dt, first); first = false;
-            vel = vw2wheels(vw, true);
-            Pb.setVelocity(vel)
-    end    
-    
-    % do some thinking and planning
-    switch mode_
-        case "setup"
-            % check if in location to start scanning
-            loc = mu(1:2);
-            distanceFromGoal = pointDist(loc', goal);
-            minDistanceFromGoal = 0.5;
-            if distanceFromGoal < minDistanceFromGoal
-                % change mode_ to scan
-                mode_ = "scan";
-            end
-            
-        case "scan"
-            scanSteps = scanSteps + 1;
-            % check if done scanning
-            if scanSteps >= desiredScanSteps
-                % change mode_ to "d2c"
-                mode_ = "d2c";
-            end
-            
-        case "d2c"
-            % calculate centroid (goal)
-            disp("calculating centroid")
-            points = mu2points(mu(4:end));
-            [centroid, pgon] = calcCentroid(points);
-            goal = centroid;
-            % check if at centroid
-            loc = mu(1:2);
-            distanceFromGoal = pointDist(loc, goal);
-            minDistanceFromGoal = 0.3;
-            if distanceFromGoal < minDistanceFromGoal
-                % change mode_ to complete
-                disp("close enough to centroid, exiting")
-                mode_ = "complete";
-            else
-                disp("planning new path")
-                % plan new path
-                start = mu(1:2);
-                goalInPx = round(goal * pixelsInM);
-                startInPx = round(start * pixelsInM);
+    loc = mu(1:2);
+    dist = pointDist(loc, currentGoal');
+    closeEnough = dist < fd;
+    while closeEnough
+        disp("updating a")
+        a = min(a+1, length(plannedPath)); % set next point on path as current goal
+        % calculate current goal
+        currentX = plannedPath(a, 1);
+        currentY = plannedPath(a, 2);
+        currentGoal = [currentX currentY]';
+        dist = pointDist(loc, currentGoal');
+        closeEnough = dist < fd; % dist from current goal < following dist
+    end
 
-                % compute path using distance transform
-                nav = zeros(100);
-                dx = DXform(nav);
-                dx.plan(goalInPx);
-                p = dx.query(startInPx);
-                plannedPath = p/50;
-                
-                % reset a
-                a = 1;
-            end
+    disp("movement: pure pursuiting")
+    vw = purePursuit(currentGoal, mu(1:3), d, dt, first); first = false;
+    disp("pure pursuiting")
+    %vw = purePursuit(currentGoal, q, d, dt, first); first = false;
+    vel = vw2wheels(vw, true);
+    Pb.setVelocity(vel)  
+    
+    % Check if reached goal
+    loc = mu(1:2);
+    distanceFromGoal = pointDist(loc', goal);
+    minDistanceFromGoal = 0.5;
+    if distanceFromGoal < minDistanceFromGoal
+        % change mode_ to scan
+        mode_ = "complete";
     end
     
     % graphics
@@ -238,6 +195,7 @@ while true
     ARENASIZE = [2, 2];
     axis([0 ARENASIZE(1) 0 ARENASIZE(2)] + [-1 1 -1 1]*zoom)
     hold on
+    
     % plot robot frame
     plotBotFrame(mu(1:3))
     % plot robot covariance
@@ -246,10 +204,9 @@ while true
     plot_landmarks(mu(4:end), Sigma(4:end, 4:end))
     
     % plot planned path
-    if strcmp(mode_, "setup") || strcmp(mode_, "d2c")
-        plot(currentX, currentY, 'kp')
-        plotPlannedPath(plannedPath)
-    end
+    plot(currentX, currentY, 'kp')
+    plotPlannedPath(plannedPath)
+    
     % plot path taken
     plotTakenPath(takenPath)
     
@@ -267,4 +224,4 @@ while true
 end
 
 Pb.stop();
-disp("mission complete")
+disp("And when you're dead I will be still alive")
