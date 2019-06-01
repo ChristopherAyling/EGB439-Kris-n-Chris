@@ -79,13 +79,11 @@ for instruction = instructions'
     % Sense Step
     img = Pb.getImage();
     [binaryCode, centroidLocations] = identifyBeaconId(img)
-    for i = 1:length(binaryCode)
-        if ismember(binaryCode(i), idBeacons) % in set of existing
-        	z = [beaconDistance(centroidLocations(i, :)); beaconBearing(centroidLocations(i, :))]
-            % Update Step
-            [mu, Sigma] = updateStepReport(mappyboi, z, mu, Sigma, Q);    
-        end
-    end
+
+    z = [beaconDistance(centroidLocations); beaconBearing(centroidLocations)]
+    % Update Step
+    [mu, Sigma] = updateStepReport(mappyboi, z, mu, Sigma, Q);    
+
     
     % Act Step
     disp("executing instruction");
