@@ -128,5 +128,5 @@ Pb.stop();
 disp("And when you're dead I will be still alive")
 
 % Save data
-fname = char(java.util.UUID.randomUUID);
+fname = char(java.util.UUID.randomUUID)
 save(fname); % save all variables in workspace, it just makes things easier
