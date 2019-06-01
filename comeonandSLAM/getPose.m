@@ -5,6 +5,6 @@ function q = getPose(Pb)
             pose = Pb.getLocalizerPose();
     end
     q = [
-        pose.pose.x, pose.pose.y, pose.pose.theta
+        pose.pose.x, pose.pose.y, deg2rad(pose.pose.theta)
     ];
 end

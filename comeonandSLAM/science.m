@@ -10,7 +10,7 @@
 
 clear
 
-Pb = PiBot('172.19.232.125', '172.19.232.12', 32);
+Pb = PiBot('172.19.232.125', '172.19.232.11', 32);
 Pb.setLEDArray(bin2dec('0000000001000000'))
 Pb.stop()
 Pb.resetEncoder();
