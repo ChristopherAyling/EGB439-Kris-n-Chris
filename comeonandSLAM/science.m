@@ -11,7 +11,7 @@
 clear
 
 Pb = PiBot('172.19.232.125', '172.19.232.12', 32);
-Pb.setLEDArray(bin2dec('0000000000000000'))
+Pb.setLEDArray(bin2dec('0000000001000000'))
 Pb.stop()
 Pb.resetEncoder();
 
@@ -47,7 +47,7 @@ prevEncoder = [0 0];
 
 % make instructions
 instruction = [10, 10];
-steps = 20;
+steps = 10;
 instructions = repmat(instruction, steps, 1);
 stepsTaken = 0;
 
@@ -78,10 +78,10 @@ for instruction = instructions'
     
     % Sense Step
     img = Pb.getImage();
-    [binaryCode, centroidLocations] = identifyBeaconId(img);
+    [binaryCode, centroidLocations] = identifyBeaconId(img)
     for i = 1:length(binaryCode)
         if ismember(binaryCode(i), idBeacons) % in set of existing
-        	z = [beaconDistance(centroidLocations(i, :)); beaconBearing(centroidLocations(i, :))];
+        	z = [beaconDistance(centroidLocations(i, :)); beaconBearing(centroidLocations(i, :))]
             % Update Step
             [mu, Sigma] = updateStepReport(mappyboi, z, mu, Sigma, Q);    
         end
