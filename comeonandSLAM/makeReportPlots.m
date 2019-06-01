@@ -20,7 +20,7 @@ for i = 1:size(vals, 1)
     R = Rdef;
     Q = diag([v(1) v(2)]).^2;
     
-    figure()
+    figure('units','normalized','outerposition',[0 0 1 1])
     subplot(1, 2, 1)
     replay;
     
@@ -50,7 +50,7 @@ for i = 1:size(vals, 1)
     R = diag([v(1) v(2)]).^2;
     Q = Qdef;
     
-    figure()
+    figure('units','normalized','outerposition',[0 0 1 1])
     subplot(1, 2, 1)
     replay;
     
