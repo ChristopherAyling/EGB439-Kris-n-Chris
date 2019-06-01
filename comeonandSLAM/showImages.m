@@ -12,7 +12,7 @@ function showImages(images)
            if binaryCode(idx) ~= -1
                 range = beaconDistance(centroidLocations(idx,:));
                 b = beaconBearing(centroidLocations(idx,:));
-                titleString = sprintf("%s\nid%s r%.2f b%.2f", titleString, num2str(binaryCode(idx)), range, b);          
+                titleString = sprintf("%s\nid%s r%.2f b%.2f", titleString, num2str(binaryCode(idx)), range, rad2deg(b));          
            end
         end
         

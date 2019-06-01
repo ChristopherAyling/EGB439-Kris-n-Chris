@@ -8,18 +8,8 @@
     Still alive.
 %}
 
-clear
-
-Pb = PiBot('172.19.232.125', '172.19.232.11', 32);
-Pb.setLEDArray(bin2dec('0000000001000000'))
-Pb.stop()
-Pb.resetEncoder();
-
 % set up plotting
-clf
-figure(1)
 axis square;
-axis equal
 grid on
 ARENASIZE = [2, 2];
 zoom = 0;
@@ -39,10 +29,9 @@ mappyboi = [1.9, 1.3;
 
 % initialise
 mu = [0.5; 1; deg2rad(0)];
-plotBotFrame(mu)
 
 % other config
-dt = 0.25;
+dt = 0;
 
 % encoder setup
 prevEncoder = [0 0];
@@ -55,54 +44,42 @@ stepsTaken = 0;
 
 % EKF Initialisations 
 Sigma = diag([0.1 0.1 0.1*pi/180]).^2;
-R = diag([.01 10*pi/180]).^2; % independant variable
-Q = diag([.15 4*pi/180]).^2; % independant variable
 
 % Data collection structures
-oracleLocalisations = [];
-EKFLocalisations = [];
-trackedTicks = [];
-images = {};
-
 idBeacons = [27, 39, 45];
+EKFLocalisations = [];
 
 disp("And when you're dying I'll be still alive")
 tic
 for instruction = instructions'
+    i = stepsTaken + 1;
     disp("steps taken: "+stepsTaken+"/"+steps)
     % get ticks and estimate new pose
-    encoder = Pb.getEncoder();
-    ticks = encoder-prevEncoder;
-    prevEncoder = encoder;
+    ticks = trackedTicks(1, :);
     [d, dth] = get_odom(mu(1:3), ticks);
     
     % Predict Step
     [mu, Sigma] = predictStepReport(mu, Sigma, d, dth, R);
     
     % Sense Step
-    img = Pb.getImage();
-    [binaryCode, centroidLocations] = identifyBeaconId(img)
+    img = images{i};
+    [binaryCode, centroidLocations] = identifyBeaconId(img);
 
-    z = [beaconDistance(centroidLocations); beaconBearing(centroidLocations)]
+    z = [beaconDistance(centroidLocations); beaconBearing(centroidLocations)];
     % Update Step
     [mu, Sigma] = updateStepReport(mappyboi, z, mu, Sigma, Q);    
 
     
     % Act Step
-    disp("executing instruction");
-    Pb.setVelocity(instruction');
+    % no acting as in replay mode
     
     % Data collection
-    oracleLocalisation = getPose(Pb);
-    oracleLocalisations = [oracleLocalisations; oracleLocalisation];
+    % no data collection as in replay mode
     EKFLocalisations = [EKFLocalisations; mu(1:3)'];
-    trackedTicks = [trackedTicks; ticks];
-    images{stepsTaken+1} = img;
-    
     
     % graphics
     disp("making pretty pictures")
-    clf
+    cla
     axis square;
     grid on
     ARENASIZE = [2, 2];
@@ -113,11 +90,9 @@ for instruction = instructions'
     plotBotFrame(mu(1:3))
     % plot robot covariance
     plot_cov(mu(1:3), Sigma(1:3, 1:3), 3)
-    % plot landmark mus & covs
-    plot_landmarks(mu(4:end), Sigma(4:end, 4:end))
     
     % plot path taken
-    plotTakenPath(oracleLocalisations, "b");
+    plotTakenPath(oracleLocalisations(1:i, :), "b");
     plotTakenPath(EKFLocalisations, "r");
     
     % plot landmarks
@@ -128,9 +103,4 @@ for instruction = instructions'
 end
 toc
 
-Pb.stop();
 disp("And when you're dead I will be still alive")
-
-% Save data
-fname = char(java.util.UUID.randomUUID)
-save(fname); % save all variables in workspace, it just makes things easier
