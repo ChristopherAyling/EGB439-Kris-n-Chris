@@ -38,7 +38,7 @@ prevEncoder = [0 0];
 
 % make instructions
 instruction = [10, 10];
-steps = 10;
+steps = 20;
 instructions = repmat(instruction, steps, 1);
 stepsTaken = 0;
 

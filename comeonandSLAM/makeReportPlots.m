@@ -25,7 +25,7 @@ for i = 1:size(vals, 1)
     replay;
     
     errs = calcErrors(oracleLocalisations, EKFLocalisations);
-    sse = sumSquaredErrors(EKFLocalisations, oracleLocalisations);
+    sse = sum(errs(:, 4).^2);
     
     subplot(1, 2, 2)
     hold on
@@ -38,9 +38,11 @@ for i = 1:size(vals, 1)
     legend('x error', 'y error', 'theta error', 'euclidean error')
     xlabel('timestep')
     ylabel('absolute error')
-    titletext = ['R Matrix r=', num2str(v(1)),' \beta=',  num2str(rad2deg(v(2))), char(176), ' SSE=', num2str(sse)];
+    titletext = ['Q Matrix r=', num2str(v(1)),' \beta=',  num2str(rad2deg(v(2))), char(176), ' SSE=', num2str(sse)];
     title(titletext, 'Interpreter', 'tex')
     hold off
+    fname = filenameify(titletext);
+    saveas(gcf, fname)
 end
 
 % loop through Rs and make plots!
@@ -71,4 +73,6 @@ for i = 1:size(vals, 1)
     titletext = ['R Matrix r=', num2str(v(1)),' \beta=',  num2str(rad2deg(v(2))), char(176), 'd SSE=', num2str(sse)];
     title(titletext, 'Interpreter', 'tex')
     hold off
+    fname = filenameify(titletext);
+    saveas(gcf, fname)
 end

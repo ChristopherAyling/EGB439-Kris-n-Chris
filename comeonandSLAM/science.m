@@ -10,7 +10,7 @@
 
 clear
 
-Pb = PiBot('172.19.232.125', '172.19.232.11', 32);
+Pb = PiBot('172.19.232.174', '172.19.232.11', 32);
 Pb.setLEDArray(bin2dec('0000000001000000'))
 Pb.stop()
 Pb.resetEncoder();
@@ -38,7 +38,7 @@ mappyboi = [1.9, 1.3;
             1.9, 0.7];
 
 % initialise
-mu = [0.5; 1; deg2rad(0)];
+mu = [0.1; 1; deg2rad(0)];
 plotBotFrame(mu)
 
 % other config
@@ -49,7 +49,7 @@ prevEncoder = [0 0];
 
 % make instructions
 instruction = [10, 10];
-steps = 10;
+steps = 20;
 instructions = repmat(instruction, steps, 1);
 stepsTaken = 0;
 
@@ -71,7 +71,7 @@ tic
 for instruction = instructions'
     disp("steps taken: "+stepsTaken+"/"+steps)
     % get ticks and estimate new pose
-    encoder = Pb.getEncoder();
+    encoder = getEncoder(Pb);
     ticks = encoder-prevEncoder;
     prevEncoder = encoder;
     [d, dth] = get_odom(mu(1:3), ticks);
